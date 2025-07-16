@@ -1,6 +1,6 @@
 import { View } from "react-native";
-import { NewButton } from "../components/button";
-import { Header } from "../components/header";
+import { Header } from "../components/layout/header";
+import { NewButton } from "../components/ui/button";
 import { colors } from "../themes";
 import { globalStyles } from "../themes/styles";
 

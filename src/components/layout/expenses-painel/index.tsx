@@ -1,0 +1,11 @@
+
+
+export function ExpensesPainel() {
+
+
+    return(
+        <>
+        
+        </>
+    )
+}
