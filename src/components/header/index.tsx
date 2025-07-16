@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { useNameStore } from "../store/useNameStore";
+import { useNameStore } from "../../store/useNameStore";
 
 
 export const Header = () => {
