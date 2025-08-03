@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { BalancePainel } from "../components/layout/balance-painel";
 import { Header } from "../components/layout/header";
 import { NewButton } from "../components/ui/button";
 import { colors } from "../themes";
@@ -9,6 +10,7 @@ export default function Home(){
         <>
         <View style={globalStyles.container}>
             <Header/>
+            <BalancePainel/>
             <NewButton bText="Income" bgColor={colors.fourth} onPress={() => {}}/>
             <NewButton bText="Expenses" bgColor={colors.expense} onPress={() => {}}/>
         </View>
