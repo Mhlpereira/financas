@@ -1,16 +1,35 @@
-import { Text, TouchableOpacity } from "react-native";
-import { styles } from "./button.style";
+import { StyleProp, Text, TouchableOpacity, ViewStyle } from 'react-native'
+import Icon from 'react-native-vector-icons/AntDesign'
+import { styles } from './button.style'
 
 interface Props {
-    bText: string;
-    onPress: () => void;
-    bgColor: string;
+    bText?: string
+    iconName?: string
+    onPress: () => void
+    bgColor: string
+    iconColor?: string
+    iconSize?: number
+    style?: StyleProp<ViewStyle>
 }
 
-export function NewButton({bText, onPress, bgColor}: Props) {
+export function NewButton({
+    bText,
+    iconName,
+    onPress,
+    bgColor,
+    iconColor,
+    iconSize,
+    style,
+}: Props) {
     return (
-        <TouchableOpacity style={[styles.button, { backgroundColor: bgColor }]} onPress={onPress}>
-            <Text style={styles.buttonText}>{bText}</Text>
+        <TouchableOpacity
+            style={[styles.button, { backgroundColor: bgColor }, style]}
+            onPress={onPress}
+        >
+            {bText && <Text style={styles.buttonText}>{bText}</Text>}
+            {iconName && (
+                <Icon name={iconName} size={iconSize} color={iconColor} />
+            )}
         </TouchableOpacity>
     )
 }
