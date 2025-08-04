@@ -17,10 +17,12 @@ export function CustomModal({ visible, onClose }: CustomModalProps) {
         >
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
-                    <Text style={styles.text}>Novo lançamento</Text>
-                    <Pressable onPress={onClose}>
-                    <Icon name="close" size={24} onPress={onClose} />
-                    </Pressable>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.text}>Novo lançamento</Text>
+                        <Pressable onPress={onClose}>
+                            <Icon name="close" size={24} onPress={onClose} />
+                        </Pressable>
+                    </View>
                 </View>
             </View>
         </Modal>

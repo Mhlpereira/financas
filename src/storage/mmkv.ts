@@ -1,6 +1,4 @@
-import { MMKV } from 'react-native-mmkv';
+import { MMKVStorageService } from "@/services/MMKVStorage.service";
 
-export const storage = new MMKV({
-    id: 'finances_storage',
-    encryptionKey: process.env.SECRET_KEY
-})
+
+export const storageService = new MMKVStorageService();

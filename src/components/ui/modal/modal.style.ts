@@ -13,6 +13,11 @@ export const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 20,
     },
+    modalHeader:{
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center' 
+    },
     text: {
         fontSize: 16,
         marginBottom: 10,
