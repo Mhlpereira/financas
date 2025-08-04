@@ -1,5 +1,6 @@
 import { Modal, Pressable, Text, View } from 'react-native'
 import Icon from 'react-native-vector-icons/AntDesign'
+import { ExpenseForm } from '../expense-form'
 import { styles } from './modal.style'
 
 type CustomModalProps = {
@@ -22,6 +23,9 @@ export function CustomModal({ visible, onClose }: CustomModalProps) {
                         <Pressable onPress={onClose}>
                             <Icon name="close" size={24} onPress={onClose} />
                         </Pressable>
+                    </View>
+                    <View>
+                        <ExpenseForm/>
                     </View>
                 </View>
             </View>
