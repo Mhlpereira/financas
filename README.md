@@ -21,3 +21,14 @@ SECRET_KEY
 ```
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
+
+                <NewButton
+                    bText="Income"
+                    bgColor={colors.fourth}
+                    onPress={() => {}}
+                />
+                <NewButton
+                    bText="Expenses"
+                    bgColor={colors.expense}
+                    onPress={() => {}}
+                />

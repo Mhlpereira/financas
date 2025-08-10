@@ -10,6 +10,8 @@ interface Props {
     iconColor?: string
     iconSize?: number
     style?: StyleProp<ViewStyle>
+    width?: string | number
+    height?: string | number
 }
 
 export function NewButton({
@@ -20,6 +22,8 @@ export function NewButton({
     iconColor,
     iconSize,
     style,
+    width,
+    height,
 }: Props) {
     return (
         <TouchableOpacity
