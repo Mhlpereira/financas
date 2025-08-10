@@ -1,6 +1,6 @@
 import { colors } from '@/src/themes'
-import { getToday } from '@/utils/getToday'
-import { maskDate } from '@/utils/mask/maskDate'
+import { getToday } from '@/src/utils/getToday'
+import { maskDate } from '@/src/utils/mask/maskDate'
 import React from 'react'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
 import { Text, TextInput, View } from 'react-native'
