@@ -1,11 +1,16 @@
+import { TransactionType } from '@/src/shared/enums/transaction.enum'
+import { Transaction } from '@/src/shared/interfaces/transaction.interface'
+import { useTransactionStore } from '@/src/store/useTransactionStore'
 import { colors } from '@/src/themes'
 import { getToday } from '@/src/utils/getToday'
 import { maskDate } from '@/src/utils/mask/maskDate'
 import React from 'react'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
 import { Text, TextInput, View } from 'react-native'
+import uuid from 'react-native-uuid'
 import { NewButton } from '../button'
 import { styles } from './expense-form.style'
+
 
 export function ExpenseForm() {
     const {
@@ -14,13 +19,29 @@ export function ExpenseForm() {
         formState: { errors },
     } = useForm<FieldValues>({
         defaultValues: {
-            installments: '1', 
-            date: getToday()
-    }})
+            installments: '1',
+            date: getToday(),
+        },
+    })
 
-    const onSubmit = (data: any) => {
-        console.log('Form Data:', data)
-    }
+    const addTransaction = useTransactionStore((state) => state.addTransaction )
+
+    const [type, setType] = React.useState<TransactionType>(
+        TransactionType.INCOME,
+    )
+
+    const onSubmit = async (data: any) => {
+        const transaction: Transaction = {
+            id: uuid.v4() as string,
+            type,
+            title: data.title,
+            amount: Number(data.value),
+            date: new Date(), 
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+        addTransaction(transaction);
+    };
 
     return (
         <View>
@@ -140,8 +161,8 @@ export function ExpenseForm() {
                     <TextInput
                         placeholder="Data do lançamento"
                         value={value}
-                        onChangeText={text => onChange(maskDate(text))}
-                        keyboardType='numeric'
+                        onChangeText={(text) => onChange(maskDate(text))}
+                        keyboardType="numeric"
                         style={{
                             borderWidth: 1,
                             borderColor: 'gray',

@@ -1,4 +1,4 @@
-import { MMKVStorageService } from "@/services/MMKVStorage.service";
+import { MMKVStorageService } from "@/src/services/MMKVStorage.service";
 
 
 export const storageService = new MMKVStorageService();
