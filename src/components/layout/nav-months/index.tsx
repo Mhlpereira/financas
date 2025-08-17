@@ -34,7 +34,7 @@ export function NavMonths({ selectedMonth, onMonthChange }: NavMonthsProps) {
 
     useEffect(() => {
         if (scrollRef.current) {
-            const itemWidth = 88 // Largura atualizada para o novo design
+            const itemWidth = 88 
             const screenWidth = Dimensions.get('window').width
             const offset =
                 (selectedMonth - 1) * itemWidth -

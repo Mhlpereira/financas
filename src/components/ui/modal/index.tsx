@@ -6,9 +6,11 @@ import { styles } from './modal.style'
 type CustomModalProps = {
     visible: boolean
     onClose: () => void
+    title?: string
+    children?: React.ReactNode
 }
 
-export function CustomModal({ visible, onClose }: CustomModalProps) {
+export function CustomModal({ visible, onClose, title = "Novo lançamento", children }: CustomModalProps) {
     return (
         <Modal
             transparent
@@ -19,13 +21,13 @@ export function CustomModal({ visible, onClose }: CustomModalProps) {
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Novo lançamento</Text>
+                        <Text style={styles.modalTitle}>{title}</Text>
                         <Pressable style={styles.closeButton} onPress={onClose}>
                             <Icon name="close" size={18} color="#6b7280" />
                         </Pressable>
                     </View>
                     <View style={styles.modalContent}>
-                        <ExpenseForm onSuccess={onClose} />
+                        {children || <ExpenseForm onSuccess={onClose} />}
                     </View>
                 </View>
             </View>

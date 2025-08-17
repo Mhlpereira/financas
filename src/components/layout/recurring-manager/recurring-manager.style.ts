@@ -1,5 +1,5 @@
-import { colors } from "@/src/themes";
-import { StyleSheet } from "react-native";
+import { colors } from '@/src/themes';
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     container: {
@@ -54,11 +54,14 @@ export const styles = StyleSheet.create({
         alignItems: "center",
         marginRight: 12,
     },
-    incomeIcon: {
+    salaryIcon: {
         backgroundColor: colors.successLight,
     },
     expenseIcon: {
         backgroundColor: colors.dangerLight,
+    },
+    recurringIcon: {
+        backgroundColor: colors.warningLight,
     },
     contentContainer: {
         flex: 1,
@@ -70,18 +73,22 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingRight: 12,
     },
-    valueCol: {
-        alignItems: "flex-end",
-    },
-    description: {
+    title: {
         fontSize: 16,
         fontWeight: "600",
         color: colors.text,
         marginBottom: 2,
     },
-    date: {
+    recurrenceInfo: {
         fontSize: 13,
         color: colors.textSecondary,
+    },
+    actionsContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    valueCol: {
+        alignItems: "flex-end",
     },
     value: {
         fontSize: 16,
@@ -95,10 +102,26 @@ export const styles = StyleSheet.create({
     expenseValue: {
         color: colors.danger,
     },
-    installment: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        textAlign: "right",
+    toggleButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: 8,
+        backgroundColor: colors.gray100,
+    },
+    activeToggle: {
+        backgroundColor: colors.successLight,
+    },
+    deleteButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: colors.dangerLight,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: 8,
     },
     emptyContainer: {
         flex: 1,
@@ -112,35 +135,20 @@ export const styles = StyleSheet.create({
         textAlign: "center",
         marginTop: 12,
     },
-    deleteButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: colors.dangerLight,
+    addButton: {
+        position: "absolute",
+        bottom: 20,
+        right: 20,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: colors.primary,
         justifyContent: "center",
         alignItems: "center",
-        marginLeft: 12,
-    },
-    actionsContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    toggleButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        marginLeft: 8,
-        backgroundColor: colors.border,
-    },
-    activeToggle: {
-        backgroundColor: colors.primary,
-    },
-    toggleText: {
-        fontSize: 12,
-        fontWeight: "600",
-        color: colors.textSecondary,
-    },
-    activeToggleText: {
-        color: colors.surface,
+        elevation: 8,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
     },
 });

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { View } from 'react-native'
 import { BalancePainel } from '../components/layout/balance-painel'
 import { ExpenseManager } from '../components/layout/expense-manager'
 import { Header } from '../components/layout/header'
@@ -20,19 +20,13 @@ export default function Home() {
                 onMonthChange={setSelectedMonth}
             />
             
-            <ScrollView 
-                style={{ flex: 1 }}
-                contentContainerStyle={homeStyles.scrollContainer}
-                showsVerticalScrollIndicator={false}
-            >
-                <View style={homeStyles.section}>
-                    <BalancePainel selectedMonth={selectedMonth} />
-                </View>
-                
-                <View style={homeStyles.section}>
-                    <ExpenseManager selectedMonth={selectedMonth} />
-                </View>
-            </ScrollView>
+            <View style={homeStyles.section}>
+                <BalancePainel selectedMonth={selectedMonth} />
+            </View>
+            
+            <View style={{ flex: 1 }}>
+                <ExpenseManager selectedMonth={selectedMonth} />
+            </View>
 
             <NewButton
                 iconName="plus"

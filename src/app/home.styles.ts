@@ -9,10 +9,6 @@ export const homeStyles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
     },
-    scrollContainer: {
-        flexGrow: 1,
-        paddingBottom: bottomSpace + 80, // Espaço extra para o botão flutuante
-    },
     title: {
         fontSize: 24,
         fontWeight: "700",
@@ -37,6 +33,7 @@ export const homeStyles = StyleSheet.create({
         zIndex: 99,
     },
     section: {
-        marginBottom: 24,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
     },
 });

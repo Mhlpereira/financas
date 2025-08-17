@@ -1,26 +1,22 @@
 
 
 export const colors = {
-    // Cores principais
-    primary: "#2563eb", // Azul moderno
+    primary: "#2563eb",
     primaryLight: "#3b82f6",
     primaryDark: "#1d4ed8",
     
-    // Cores secundárias
-    secondary: "#f8fafc", // Cinza claro
+    secondary: "#f8fafc", 
     secondaryDark: "#e2e8f0",
     
-    // Cores funcionais
-    success: "#10b981", // Verde para receitas
+    success: "#10b981",
     successLight: "#34d399",
     
-    danger: "#ef4444", // Vermelho para despesas
+    danger: "#ef4444", 
     dangerLight: "#f87171",
     
-    warning: "#f59e0b", // Amarelo para alertas
+    warning: "#f59e0b",
     warningLight: "#fbbf24",
     
-    // Cores neutras
     white: "#ffffff",
     black: "#000000",
     gray50: "#f9fafb",
@@ -34,9 +30,8 @@ export const colors = {
     gray800: "#1f2937",
     gray900: "#111827",
     
-    // Cores específicas da aplicação
-    income: "#10b981", // Verde para receitas
-    expense: "#ef4444", // Vermelho para despesas
+    income: "#10b981", 
+    expense: "#ef4444", 
     background: "#f8fafc",
     surface: "#ffffff",
     text: "#1f2937",

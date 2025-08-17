@@ -1,6 +1,6 @@
 import { useTransactionStore } from '@/src/store/useTransactionStore';
 import { formatCurrencySimple } from '@/src/utils/formatCurrency';
-import React from 'react';
+import { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { styles } from './expense-manager.style';
@@ -11,11 +11,20 @@ interface ExpenseManagerProps {
 
 export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
     const transactions = useTransactionStore(state => state.transactions);
+    const recurringTransactions = useTransactionStore(state => state.recurringTransactions);
     const removeTransaction = useTransactionStore(state => state.removeTransaction);
+    const removeRecurringTransaction = useTransactionStore(state => state.removeRecurringTransaction);
+    
+    const [showRecurring, setShowRecurring] = useState(false);
     
     const filteredTransactions = transactions.filter(item => {
         const itemDate = new Date(item.date);
         return itemDate.getMonth() + 1 === selectedMonth;
+    });
+
+    const filteredRecurringTransactions = recurringTransactions.filter(item => {
+        // Mostrar todas as transações recorrentes independente do mês
+        return true;
     });
 
     const handleDeleteTransaction = (item: any) => {
@@ -31,6 +40,24 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
                     text: "Sim",
                     style: "destructive",
                     onPress: () => removeTransaction(item.id)
+                }
+            ]
+        );
+    };
+
+    const handleDeleteRecurringTransaction = (item: any) => {
+        Alert.alert(
+            "Excluir transação recorrente",
+            `Você deseja excluir "${item.title}"?\nIsso impedirá a criação futura dessa transação.`,
+            [
+                {
+                    text: "Não",
+                    style: "cancel"
+                },
+                {
+                    text: "Sim",
+                    style: "destructive",
+                    onPress: () => removeRecurringTransaction(item.id)
                 }
             ]
         );
@@ -54,8 +81,10 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
                     <View style={styles.descriptionCol}>
                         <Text style={styles.description}>{item.title}</Text>
                         <Text style={styles.date}>
-                            {new Date(item.date).toLocaleDateString('pt-BR')}
-                            {item.isInstalment && ' • Parcelado'}
+                            {showRecurring 
+                                ? `Recorrência: ${item.recurrenceType}` 
+                                : `${new Date(item.date).toLocaleDateString('pt-BR')}${item.isInstalment ? ' • Parcelado' : ''}`
+                            }
                         </Text>
                     </View>
                     
@@ -74,7 +103,10 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
                         
                         <TouchableOpacity 
                             style={styles.deleteButton}
-                            onPress={() => handleDeleteTransaction(item)}
+                            onPress={() => showRecurring 
+                                ? handleDeleteRecurringTransaction(item) 
+                                : handleDeleteTransaction(item)
+                            }
                         >
                             <Icon name="delete" size={16} color="#dc2626" />
                         </TouchableOpacity>
@@ -88,7 +120,10 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
         <View style={styles.emptyContainer}>
             <Icon name="inbox" size={48} color="#9ca3af" />
             <Text style={styles.emptyText}>
-                Nenhuma transação encontrada para este mês
+                {showRecurring 
+                    ? "Nenhuma transação recorrente cadastrada"
+                    : "Nenhuma transação encontrada para este mês"
+                }
             </Text>
         </View>
     );
@@ -97,15 +132,32 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Icon name="bars" size={24} color="#1f2937" />
-                <Text style={styles.headerTitle}>Lançamentos</Text>
-                <View style={{ flex: 1 }} />
-                <Text style={[styles.headerTitle, { fontSize: 16 }]}>
-                    {filteredTransactions.length} 
+                <Text style={styles.headerTitle}>
+                    {showRecurring ? 'Recorrentes' : 'Lançamentos'}
                 </Text>
+                <View style={{ flex: 1 }} />
+                
+                <TouchableOpacity 
+                    style={[styles.toggleButton, !showRecurring && styles.activeToggle]}
+                    onPress={() => setShowRecurring(false)}
+                >
+                    <Text style={[styles.toggleText, !showRecurring && styles.activeToggleText]}>
+                        Normal
+                    </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                    style={[styles.toggleButton, showRecurring && styles.activeToggle]}
+                    onPress={() => setShowRecurring(true)}
+                >
+                    <Text style={[styles.toggleText, showRecurring && styles.activeToggleText]}>
+                        Recorrente
+                    </Text>
+                </TouchableOpacity>
             </View>
             
             <FlatList
-                data={filteredTransactions}
+                data={showRecurring ? filteredRecurringTransactions : filteredTransactions}
                 keyExtractor={item => item.id}
                 renderItem={renderTransactionItem}
                 ListEmptyComponent={renderEmptyList}

@@ -1,6 +1,7 @@
 import { TransactionType } from '@/src/shared/enums/transaction.enum'
 import { useTransactionStore } from '@/src/store/useTransactionStore'
 import { formatCurrencySimple } from '@/src/utils/formatCurrency'
+import React from 'react'
 import { Text, View } from 'react-native'
 import { styles } from './balance-painel.style'
 
@@ -15,6 +16,13 @@ const monthNames = [
 
 export function BalancePainel({ selectedMonth }: BalancePainelProps) {
     const transactions = useTransactionStore(state => state.transactions);
+    const generateRecurringTransactions = useTransactionStore(state => state.generateRecurringTransactions);
+    
+    // Gerar transações recorrentes para o mês selecionado
+    React.useEffect(() => {
+        const currentYear = new Date().getFullYear();
+        generateRecurringTransactions(selectedMonth, currentYear);
+    }, [selectedMonth, generateRecurringTransactions]);
     
     const monthTransactions = transactions.filter(item => {
         const itemDate = new Date(item.date);

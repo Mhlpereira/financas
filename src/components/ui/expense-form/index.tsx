@@ -5,14 +5,26 @@ import { getToday } from '@/src/utils/getToday'
 import { maskDate } from '@/src/utils/mask/maskDate'
 import React from 'react'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
-import { Text, TextInput, View } from 'react-native'
+import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import uuid from 'react-native-uuid'
+import Icon from 'react-native-vector-icons/AntDesign'
 import { NewButton } from '../button'
 import { styles } from './expense-form.style'
 
 interface ExpenseFormProps {
     onSuccess?: () => void;
 }
+
+const CATEGORIES = [
+    { id: 'food', name: 'Alimentação', icon: 'twitter' },
+    { id: 'transport', name: 'Transporte', icon: 'car' },
+    { id: 'health', name: 'Saúde', icon: 'medicinebox' },
+    { id: 'education', name: 'Educação', icon: 'book' },
+    { id: 'entertainment', name: 'Entretenimento', icon: 'playcircleo' },
+    { id: 'shopping', name: 'Compras', icon: 'shoppingcart' },
+    { id: 'bills', name: 'Contas', icon: 'filetext1' },
+    { id: 'other', name: 'Outros', icon: 'ellipsis1' },
+];
 
 export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
     const {
@@ -22,66 +34,147 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
         reset,
     } = useForm<FieldValues>({
         defaultValues: {
-            installments: '1',
+            installments: '',
             date: getToday(),
+            category: 'other',
         },
     })
 
     const addTransaction = useTransactionStore((state) => state.addTransaction);
     const addTransactionWithInstallments = useTransactionStore((state) => state.addTransactionWithInstallments);
+    const addRecurringTransaction = useTransactionStore((state) => state.addRecurringTransaction);
 
-    const [type, setType] = React.useState<TransactionType>(
-        TransactionType.INCOME,
-    )
+    const [type, setType] = React.useState<TransactionType>(TransactionType.INCOME)
+    const [isRecurring, setIsRecurring] = React.useState(false)
+    const [showCategoryModal, setShowCategoryModal] = React.useState(false)
+    const [selectedCategory, setSelectedCategory] = React.useState(CATEGORIES[0])
+    const [installmentsValue, setInstallmentsValue] = React.useState('') 
 
     const onSubmit = async (data: any) => {
-        const installments = Number(data.installments);
-        
+        const installments = Number(installmentsValue) || 1; 
+
         let transactionDate = new Date();
         if (data.date) {
             const [day, month, year] = data.date.split('/');
             transactionDate = new Date(year, month - 1, day);
         }
         
-        const transaction: Transaction = {
-            id: uuid.v4() as string,
-            type,
-            title: data.title,
-            amount: Number(data.value),
-            date: transactionDate, 
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+        if (isRecurring) {
+            const recurringTransaction = {
+                id: uuid.v4() as string,
+                type,
+                title: data.title,
+                amount: Number(data.value),
+                recurrenceType: 'monthly' as any, 
+                dayOfMonth: transactionDate.getDate(),
+                isActive: true,
+                startDate: transactionDate,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
 
-        if (installments > 1) {
-            addTransactionWithInstallments(transaction, installments);
+            addRecurringTransaction(recurringTransaction);
         } else {
-            addTransaction(transaction);
+            const transaction: Transaction = {
+                id: uuid.v4() as string,
+                type,
+                title: data.title,
+                amount: Number(data.value),
+                date: transactionDate, 
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            if (installments > 1) {
+                addTransactionWithInstallments(transaction, installments);
+            } else {
+                addTransaction(transaction);
+            }
         }
 
-        // Limpar o formulário após salvar
         reset({
             title: '',
             value: '',
             installments: '1',
             date: getToday(),
+            category: 'other',
         });
 
-        // Resetar o tipo para entrada
         setType(TransactionType.INCOME);
+        setIsRecurring(false);
+        setSelectedCategory(CATEGORIES[7]);
+        setInstallmentsValue('');
 
-        // Chamar callback de sucesso se fornecido
         if (onSuccess) {
             onSuccess();
         }
     };
 
+    const handleInstallmentsChange = (value: string) => {
+        setInstallmentsValue(value);
+        if (Number(value) > 1) {
+            setIsRecurring(false);
+        }
+    };
+
+    const renderCategoryModal = () => (
+        <Modal
+            visible={showCategoryModal}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={() => setShowCategoryModal(false)}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Escolher Categoria</Text>
+                        <TouchableOpacity 
+                            onPress={() => setShowCategoryModal(false)}
+                            style={styles.closeButton}
+                        >
+                            <Icon name="close" size={24} color="#6b7280" />
+                        </TouchableOpacity>
+                    </View>
+                    
+                    <View style={styles.categoriesGrid}>
+                        {CATEGORIES.map((category) => (
+                            <TouchableOpacity
+                                key={category.id}
+                                style={[
+                                    styles.categoryItem,
+                                    selectedCategory.id === category.id && styles.selectedCategory
+                                ]}
+                                onPress={() => {
+                                    setSelectedCategory(category);
+                                    setShowCategoryModal(false);
+                                }}
+                            >
+                                <Icon 
+                                    name={category.icon} 
+                                    size={24} 
+                                    color={selectedCategory.id === category.id ? '#fff' : '#6b7280'} 
+                                />
+                                <Text style={[
+                                    styles.categoryText,
+                                    selectedCategory.id === category.id && styles.selectedCategoryText
+                                ]}>
+                                    {category.name}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+
     return (
         <View>
+            {renderCategoryModal()}
+            
             <Controller
                 control={control}
                 name="title"
-                rules={{ required: 'Nome é obrigatório' }}
                 render={({
                     field: { onChange, value },
                 }: {
@@ -100,6 +193,18 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                     {String(errors.title.message)}
                 </Text>
             )}
+            
+            <TouchableOpacity 
+                style={styles.categorySelector}
+                onPress={() => setShowCategoryModal(true)}
+            >
+                <Icon name={selectedCategory.icon} size={20} color="#6b7280" />
+                <Text style={styles.categorySelectorText}>
+                    {selectedCategory.name}
+                </Text>
+                <Icon name="down" size={16} color="#6b7280" />
+            </TouchableOpacity>
+            
             <View style={styles.valueInstallment}>
                 <Controller
                     control={control}
@@ -128,32 +233,31 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                         />
                     )}
                 />
-                <Controller
-                    control={control}
-                    name="installments"
-                    rules={{
-                        pattern: {
-                            value: /^[0-9]+$/,
-                            message: 'Valor deve ser um número',
-                        },
-                    }}
-                    render={({
-                        field: { onChange, value },
-                    }: {
-                        field: {
-                            onChange: (text: string) => void
-                            value: string
-                        }
-                    }) => (
-                        <TextInput
-                            placeholder="Parcelas"
-                            value={value}
-                            onChangeText={onChange}
-                            keyboardType="numeric"
-                            style={styles.inputFlex}
-                        />
-                    )}
-                />
+                {!isRecurring && (
+                    <Controller
+                        control={control}
+                        name="installments"
+                        render={({
+                            field: { onChange },
+                        }: {
+                            field: {
+                                onChange: (text: string) => void
+                                value: string
+                            }
+                        }) => (
+                            <TextInput
+                                placeholder="Parcelas"
+                                value={installmentsValue}
+                                onChangeText={(value) => {
+                                    onChange(value);
+                                    handleInstallmentsChange(value);
+                                }}
+                                keyboardType="numeric"
+                                style={styles.inputFlex}
+                            />
+                        )}
+                    />
+                )}
             </View>
             {errors.value && (
                 <Text style={styles.errorText}>
@@ -183,6 +287,39 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                     {String(errors.date.message)}
                 </Text>
             )}
+            
+            <TouchableOpacity 
+                style={[
+                    styles.recurringToggle,
+                    Number(installmentsValue) > 1 && styles.disabledToggle
+                ]}
+                onPress={() => {
+                    if (Number(installmentsValue) <= 1) {
+                        setIsRecurring(!isRecurring);
+                    }
+                }}
+                disabled={Number(installmentsValue) > 1}
+            >
+                <Icon 
+                    name={isRecurring ? "checkcircle" : "checkcircleo"} 
+                    size={20} 
+                    color={
+                        Number(installmentsValue) > 1 
+                            ? "#d1d5db" 
+                            : isRecurring 
+                                ? "#22c55e" 
+                                : "#6b7280"
+                    } 
+                />
+                <Text style={[
+                    styles.recurringText,
+                    Number(installmentsValue) > 1 && styles.disabledText
+                ]}>
+                    Lançamento recorrente (mensal)
+                    {Number(installmentsValue) > 1 && " - Não disponível com parcelas"}
+                </Text>
+            </TouchableOpacity>
+            
             <View style={styles.buttonContainer}>
                 <NewButton
                     bText="Entrada"
@@ -201,7 +338,8 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
             </View>
 
             <NewButton
-                bText="Salvar"
+                bText={isRecurring ? "Salvar Recorrente" : "Salvar Lançamento"}
+                iconName={isRecurring ? "clockcircle" : "check"}
                 onPress={handleSubmit(onSubmit)}
                 variant="primary"
                 style={{ marginTop: 16 }}

@@ -8,7 +8,6 @@ export const globalStyles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     
-    // Componentes de card
     card: {
         backgroundColor: colors.surface,
         borderRadius: 12,
@@ -23,7 +22,6 @@ export const globalStyles = StyleSheet.create({
         borderColor: colors.border,
     },
     
-    // Textos
     title: {
         fontSize: 24,
         fontWeight: 'bold',
@@ -50,7 +48,6 @@ export const globalStyles = StyleSheet.create({
         lineHeight: 20,
     },
     
-    // Inputs
     input: {
         backgroundColor: colors.surface,
         borderWidth: 1,
@@ -68,7 +65,6 @@ export const globalStyles = StyleSheet.create({
         borderWidth: 2,
     },
     
-    // Botões
     buttonPrimary: {
         backgroundColor: colors.primary,
         borderRadius: 8,
@@ -112,7 +108,6 @@ export const globalStyles = StyleSheet.create({
         justifyContent: 'center',
     },
     
-    // Textos dos botões
     buttonTextPrimary: {
         color: colors.white,
         fontSize: 16,
@@ -125,7 +120,6 @@ export const globalStyles = StyleSheet.create({
         fontWeight: '600',
     },
     
-    // Layouts
     row: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -140,7 +134,6 @@ export const globalStyles = StyleSheet.create({
         justifyContent: 'center',
     },
     
-    // Espaçamentos
     mb8: { marginBottom: 8 },
     mb16: { marginBottom: 16 },
     mb24: { marginBottom: 24 },
@@ -148,7 +141,6 @@ export const globalStyles = StyleSheet.create({
     mt16: { marginTop: 16 },
     mt24: { marginTop: 24 },
     
-    // Cores de fundo
     bgPrimary: { backgroundColor: colors.primary },
     bgSecondary: { backgroundColor: colors.secondary },
     bgSuccess: { backgroundColor: colors.success },
