@@ -1,3 +1,5 @@
+import { useTransactionStore } from '@/src/store/useTransactionStore';
+import { formatCurrencySimple } from '@/src/utils/formatCurrency';
 import React from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { styles } from './expense-manager.style';
@@ -6,60 +8,10 @@ interface ExpenseManagerProps {
     selectedMonth: number;
 }
 
-const expense = [
-    {
-        id: 1,
-        description: 'Aluguel',
-        value: 1200,
-        installment: '8/12',
-        date: '2025-08-01',
-    },
-    {
-        id: 2,
-        description: 'Internet',
-        value: 200,
-        installment: '0',
-        date: '2025-08-05',
-    },
-    {
-        id: 3,
-        description: 'Supermercado',
-        value: 500,
-        installment: '0',
-        date: '2025-08-10',
-    },
-    {
-        id: 4,
-        description: 'memória ram',
-        value: 300,
-        installment: '2/4',
-        date: '2025-08-15',
-    },
-    {
-        id: 5,
-        description: 'Conta de luz',
-        value: 150,
-        installment: '0',
-        date: '2025-08-20',
-    },
-    {
-        id: 6,
-        description: 'Conta de água',
-        value: 100,
-        installment: '0',
-        date: '2025-08-25',
-    },
-    {     id: 7,   
-        description: 'Telefone',
-        value: 80,
-        installment: '0',
-        date: '2025-08-30',
-    }, 
-
-]
-
 export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
-    const filteredExpenses = expense.filter(item => {
+    const transactions = useTransactionStore(state => state.transactions);
+    
+    const filteredTransactions = transactions.filter(item => {
         const itemDate = new Date(item.date);
         return itemDate.getMonth() + 1 === selectedMonth;
     });
@@ -69,24 +21,21 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
             <View style={styles.header}>
                 <Text style={styles.description}>Lançamentos</Text>
                 <Text style={[styles.value, { textAlign: 'right', flex: 1 }]}>
-                    {filteredExpenses.length} 
+                    {filteredTransactions.length} 
                 </Text>
             </View>
             <FlatList
-                data={filteredExpenses}
-                keyExtractor={item => item.id.toString()}
+                data={filteredTransactions}
+                keyExtractor={item => item.id}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} onPress={() => {}}>
                         <View style={styles.row}>
                             <View style={styles.descriptionCol}>
-                                <Text style={styles.description}>{item.description}</Text>
+                                <Text style={styles.description}>{item.title}</Text>
                                 <Text style={styles.date}>{new Date(item.date).toLocaleDateString()}</Text>
                             </View>
                             <View style={styles.valueCol}>
-                                <Text style={styles.value}>R$ {item.value.toFixed(2).replace('.', ',')}</Text>
-                                {item.installment !== '0' && (
-                                    <Text style={styles.installment}>{item.installment}</Text>
-                                )}
+                                <Text style={styles.value}>{formatCurrencySimple(item.amount)}</Text>
                             </View>
                         </View>
                     </TouchableOpacity>

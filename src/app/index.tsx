@@ -22,7 +22,7 @@ export default function Home() {
                     selectedMonth={selectedMonth}
                     onMonthChange={setSelectedMonth}
                 />
-                <BalancePainel />
+                <BalancePainel selectedMonth={selectedMonth} />
                 <ExpenseManager selectedMonth={selectedMonth} />
                 <NewButton
                     iconName="plus"
