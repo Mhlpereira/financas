@@ -181,7 +181,7 @@ export function ExpenseForm() {
                 <NewButton
                     bText="Entrada"
                     iconName="plus"
-                    onPress={handleSubmit(onSubmit)}
+                    onPress={setType.bind(null, TransactionType.INCOME)}
                     bgColor={colors.fourth}
                     iconColor={colors.primary}
                     iconSize={20}
@@ -190,7 +190,7 @@ export function ExpenseForm() {
                 <NewButton
                     bText="Saida"
                     iconName="minus"
-                    onPress={() => console.log('Cancel')}
+                    onPress={setType.bind(null, TransactionType.EXPENSE)}
                     bgColor={colors.third}
                     iconColor={colors.expense}
                     iconSize={20}
