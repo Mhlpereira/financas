@@ -2,6 +2,10 @@ import React from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { styles } from './expense-manager.style';
 
+interface ExpenseManagerProps {
+    selectedMonth: number;
+}
+
 const expense = [
     {
         id: 1,
@@ -54,17 +58,22 @@ const expense = [
 
 ]
 
-export function ExpenseManager() {
+export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
+    const filteredExpenses = expense.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate.getMonth() + 1 === selectedMonth;
+    });
+
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.header}>
                 <Text style={styles.description}>Lançamentos</Text>
                 <Text style={[styles.value, { textAlign: 'right', flex: 1 }]}>
-                    {expense.length} 
+                    {filteredExpenses.length} 
                 </Text>
             </View>
             <FlatList
-                data={expense}
+                data={filteredExpenses}
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} onPress={() => {}}>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import {
     Dimensions,
     Pressable,
@@ -25,9 +25,12 @@ const months = [
     { id: 12, name: 'DEZ' },
 ]
 
-export function NavMonths() {
-    const currentMonth = new Date().getMonth() + 1 // Janeiro = 0, por isso +1
-    const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+interface NavMonthsProps {
+    selectedMonth: number;
+    onMonthChange: (month: number) => void;
+}
+
+export function NavMonths({ selectedMonth, onMonthChange }: NavMonthsProps) {
     const scrollRef = useRef<ScrollView>(null)
 
     useEffect(() => {
@@ -49,7 +52,7 @@ export function NavMonths() {
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.icon}
-                onPress={() => setSelectedMonth(Math.max(1, selectedMonth - 1))}
+                onPress={() => onMonthChange(Math.max(1, selectedMonth - 1))}
             >
                 <Icon name="left" size={20} />
             </TouchableOpacity>
@@ -63,7 +66,7 @@ export function NavMonths() {
                         <Pressable
                             key={month.id}
                             style={styles.monthButton}
-                            onPress={() => setSelectedMonth(month.id)}
+                            onPress={() => onMonthChange(month.id)}
                         >
                             <Text
                                 style={[
@@ -81,7 +84,7 @@ export function NavMonths() {
             <TouchableOpacity
                 style={styles.icon}
                 onPress={() =>
-                    setSelectedMonth(Math.min(12, selectedMonth + 1))
+                    onMonthChange(Math.min(12, selectedMonth + 1))
                 }
             >
                 <Icon name="right" size={20} />

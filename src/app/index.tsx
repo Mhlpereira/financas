@@ -12,14 +12,18 @@ import { homeStyles } from './home.styles'
 
 export default function Home() {
     const [isModalVisible, setModalVisible] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
     return (
         <>
             <View style={globalStyles.container}>
                 <Header />
-                <NavMonths />
+                <NavMonths 
+                    selectedMonth={selectedMonth}
+                    onMonthChange={setSelectedMonth}
+                />
                 <BalancePainel />
-                <ExpenseManager />
+                <ExpenseManager selectedMonth={selectedMonth} />
                 <NewButton
                     iconName="plus"
                     iconColor={colors.black}
