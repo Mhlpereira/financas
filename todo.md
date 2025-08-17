@@ -1,0 +1,4 @@
+- criar configuração
+- colocar função para salário
+- despesas recorrentes
+- login com senha

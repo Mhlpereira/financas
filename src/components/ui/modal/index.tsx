@@ -19,13 +19,13 @@ export function CustomModal({ visible, onClose }: CustomModalProps) {
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.text}>Novo lançamento</Text>
-                        <Pressable onPress={onClose}>
-                            <Icon name="close" size={24} onPress={onClose} />
+                        <Text style={styles.modalTitle}>Novo lançamento</Text>
+                        <Pressable style={styles.closeButton} onPress={onClose}>
+                            <Icon name="close" size={18} color="#6b7280" />
                         </Pressable>
                     </View>
-                    <View>
-                        <ExpenseForm/>
+                    <View style={styles.modalContent}>
+                        <ExpenseForm onSuccess={onClose} />
                     </View>
                 </View>
             </View>

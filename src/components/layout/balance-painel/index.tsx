@@ -36,24 +36,26 @@ export function BalancePainel({ selectedMonth }: BalancePainelProps) {
     return (
         <>
             <View style={styles.balancePainel}>
-                <Text>{mesAno}</Text>
-                <View>
-                    <Text style={styles.titulo}>Disponível:</Text>
+                <Text style={styles.mesAno}>{mesAno}</Text>
+                
+                <View style={styles.disponivelContainer}>
+                    <Text style={styles.titulo}>Disponível</Text>
                     <Text style={styles.disponivel}>
                         {formatCurrencySimple(disponivel)}
                     </Text>
                 </View>
+                
                 <View style={styles.row}>
                     <View style={styles.col}>
-                        <Text style={styles.label}>Usado</Text>
-                        <Text style={styles.valor}>
-                            {formatCurrencySimple(valorUsado)}
+                        <Text style={styles.label}>Receitas</Text>
+                        <Text style={[styles.valor, styles.valorReceita]}>
+                            {formatCurrencySimple(valorRecebido)}
                         </Text>
                     </View>
                     <View style={styles.col}>
-                        <Text style={styles.label}>Recebido</Text>
-                        <Text style={styles.valor}>
-                            {formatCurrencySimple(valorRecebido)}
+                        <Text style={styles.label}>Despesas</Text>
+                        <Text style={[styles.valor, styles.valorDespesa]}>
+                            {formatCurrencySimple(valorUsado)}
                         </Text>
                     </View>
                 </View>

@@ -1,7 +1,6 @@
 import { TransactionType } from '@/src/shared/enums/transaction.enum'
 import { Transaction } from '@/src/shared/interfaces/transaction.interface'
 import { useTransactionStore } from '@/src/store/useTransactionStore'
-import { colors } from '@/src/themes'
 import { getToday } from '@/src/utils/getToday'
 import { maskDate } from '@/src/utils/mask/maskDate'
 import React from 'react'
@@ -11,12 +10,16 @@ import uuid from 'react-native-uuid'
 import { NewButton } from '../button'
 import { styles } from './expense-form.style'
 
+interface ExpenseFormProps {
+    onSuccess?: () => void;
+}
 
-export function ExpenseForm() {
+export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
     const {
         control,
         handleSubmit,
         formState: { errors },
+        reset,
     } = useForm<FieldValues>({
         defaultValues: {
             installments: '1',
@@ -24,23 +27,53 @@ export function ExpenseForm() {
         },
     })
 
-    const addTransaction = useTransactionStore((state) => state.addTransaction )
+    const addTransaction = useTransactionStore((state) => state.addTransaction);
+    const addTransactionWithInstallments = useTransactionStore((state) => state.addTransactionWithInstallments);
 
     const [type, setType] = React.useState<TransactionType>(
         TransactionType.INCOME,
     )
 
     const onSubmit = async (data: any) => {
+        const installments = Number(data.installments);
+        
+        let transactionDate = new Date();
+        if (data.date) {
+            const [day, month, year] = data.date.split('/');
+            transactionDate = new Date(year, month - 1, day);
+        }
+        
         const transaction: Transaction = {
             id: uuid.v4() as string,
             type,
             title: data.title,
             amount: Number(data.value),
-            date: new Date(), 
+            date: transactionDate, 
             createdAt: new Date(),
             updatedAt: new Date(),
         };
-        addTransaction(transaction);
+
+        if (installments > 1) {
+            addTransactionWithInstallments(transaction, installments);
+        } else {
+            addTransaction(transaction);
+        }
+
+        // Limpar o formulário após salvar
+        reset({
+            title: '',
+            value: '',
+            installments: '1',
+            date: getToday(),
+        });
+
+        // Resetar o tipo para entrada
+        setType(TransactionType.INCOME);
+
+        // Chamar callback de sucesso se fornecido
+        if (onSuccess) {
+            onSuccess();
+        }
     };
 
     return (
@@ -58,17 +91,12 @@ export function ExpenseForm() {
                         placeholder="Nome do lançamento"
                         value={value}
                         onChangeText={onChange}
-                        style={{
-                            borderWidth: 1,
-                            borderColor: 'gray',
-                            padding: 8,
-                            marginBottom: 8,
-                        }}
+                        style={styles.input}
                     />
                 )}
             />
             {errors.title && (
-                <Text style={{ color: 'red' }}>
+                <Text style={styles.errorText}>
                     {String(errors.title.message)}
                 </Text>
             )}
@@ -96,21 +124,10 @@ export function ExpenseForm() {
                             value={value}
                             onChangeText={onChange}
                             keyboardType="numeric"
-                            style={{
-                                flex: 1,
-                                borderWidth: 1,
-                                borderColor: 'gray',
-                                padding: 8,
-                                marginBottom: 8,
-                            }}
+                            style={styles.inputFlex}
                         />
                     )}
                 />
-                {errors.value && (
-                    <Text style={{ color: 'red' }}>
-                        {String(errors.value.message)}
-                    </Text>
-                )}
                 <Controller
                     control={control}
                     name="installments"
@@ -133,22 +150,16 @@ export function ExpenseForm() {
                             value={value}
                             onChangeText={onChange}
                             keyboardType="numeric"
-                            style={{
-                                flex: 1,
-                                borderWidth: 1,
-                                borderColor: 'gray',
-                                padding: 8,
-                                marginBottom: 8,
-                            }}
+                            style={styles.inputFlex}
                         />
                     )}
                 />
-                {errors.value && (
-                    <Text style={{ color: 'red' }}>
-                        {String(errors.value.message)}
-                    </Text>
-                )}
             </View>
+            {errors.value && (
+                <Text style={styles.errorText}>
+                    {String(errors.value.message)}
+                </Text>
+            )}
             <Controller
                 control={control}
                 name="date"
@@ -163,17 +174,12 @@ export function ExpenseForm() {
                         value={value}
                         onChangeText={(text) => onChange(maskDate(text))}
                         keyboardType="numeric"
-                        style={{
-                            borderWidth: 1,
-                            borderColor: 'gray',
-                            padding: 8,
-                            marginBottom: 8,
-                        }}
+                        style={styles.input}
                     />
                 )}
             />
             {errors.date?.message && (
-                <Text style={{ color: 'red' }}>
+                <Text style={styles.errorText}>
                     {String(errors.date.message)}
                 </Text>
             )}
@@ -181,30 +187,24 @@ export function ExpenseForm() {
                 <NewButton
                     bText="Entrada"
                     iconName="plus"
-                    onPress={setType.bind(null, TransactionType.INCOME)}
-                    bgColor={colors.fourth}
-                    iconColor={colors.primary}
-                    iconSize={20}
-                    style={[styles.button, { borderColor: colors.third }]}
+                    onPress={() => setType(TransactionType.INCOME)}
+                    variant={type === TransactionType.INCOME ? "success" : "secondary"}
+                    style={styles.button}
                 />
                 <NewButton
-                    bText="Saida"
+                    bText="Saída"
                     iconName="minus"
-                    onPress={setType.bind(null, TransactionType.EXPENSE)}
-                    bgColor={colors.third}
-                    iconColor={colors.expense}
-                    iconSize={20}
-                    style={[styles.button, { borderColor: colors.third }]}
+                    onPress={() => setType(TransactionType.EXPENSE)}
+                    variant={type === TransactionType.EXPENSE ? "danger" : "secondary"}
+                    style={styles.button}
                 />
             </View>
 
             <NewButton
                 bText="Salvar"
                 onPress={handleSubmit(onSubmit)}
-                bgColor="#4CAF50"
-                iconColor="#fff"
-                iconSize={20}
-                style={{ marginTop: 10 }}
+                variant="primary"
+                style={{ marginTop: 16 }}
             />
         </View>
     )
