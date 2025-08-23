@@ -155,12 +155,4 @@ export const styles = StyleSheet.create({
         color: colors.text,
         marginLeft: 8,
     },
-    
-    disabledToggle: {
-        opacity: 0.5,
-    },
-    
-    disabledText: {
-        color: colors.textSecondary,
-    },
 });

@@ -47,11 +47,10 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
     const [type, setType] = React.useState<TransactionType>(TransactionType.INCOME)
     const [isRecurring, setIsRecurring] = React.useState(false)
     const [showCategoryModal, setShowCategoryModal] = React.useState(false)
-    const [selectedCategory, setSelectedCategory] = React.useState(CATEGORIES[0])
-    const [installmentsValue, setInstallmentsValue] = React.useState('') 
+    const [selectedCategory, setSelectedCategory] = React.useState(CATEGORIES[0]) 
 
     const onSubmit = async (data: any) => {
-        const installments = Number(installmentsValue) || 1; 
+        const installments = Number(data.installments) || 1; 
 
         let transactionDate = new Date();
         if (data.date) {
@@ -103,17 +102,9 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
         setType(TransactionType.INCOME);
         setIsRecurring(false);
         setSelectedCategory(CATEGORIES[7]);
-        setInstallmentsValue('');
 
         if (onSuccess) {
             onSuccess();
-        }
-    };
-
-    const handleInstallmentsChange = (value: string) => {
-        setInstallmentsValue(value);
-        if (Number(value) > 1) {
-            setIsRecurring(false);
         }
     };
 
@@ -238,7 +229,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                         control={control}
                         name="installments"
                         render={({
-                            field: { onChange },
+                            field: { onChange, value },
                         }: {
                             field: {
                                 onChange: (text: string) => void
@@ -247,11 +238,8 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                         }) => (
                             <TextInput
                                 placeholder="Parcelas"
-                                value={installmentsValue}
-                                onChangeText={(value) => {
-                                    onChange(value);
-                                    handleInstallmentsChange(value);
-                                }}
+                                value={value}
+                                onChangeText={onChange}
                                 keyboardType="numeric"
                                 style={styles.inputFlex}
                             />
@@ -289,34 +277,16 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
             )}
             
             <TouchableOpacity 
-                style={[
-                    styles.recurringToggle,
-                    Number(installmentsValue) > 1 && styles.disabledToggle
-                ]}
-                onPress={() => {
-                    if (Number(installmentsValue) <= 1) {
-                        setIsRecurring(!isRecurring);
-                    }
-                }}
-                disabled={Number(installmentsValue) > 1}
+                style={styles.recurringToggle}
+                onPress={() => setIsRecurring(!isRecurring)}
             >
                 <Icon 
                     name={isRecurring ? "checkcircle" : "checkcircleo"} 
                     size={20} 
-                    color={
-                        Number(installmentsValue) > 1 
-                            ? "#d1d5db" 
-                            : isRecurring 
-                                ? "#22c55e" 
-                                : "#6b7280"
-                    } 
+                    color={isRecurring ? "#22c55e" : "#6b7280"} 
                 />
-                <Text style={[
-                    styles.recurringText,
-                    Number(installmentsValue) > 1 && styles.disabledText
-                ]}>
+                <Text style={styles.recurringText}>
                     Lançamento recorrente (mensal)
-                    {Number(installmentsValue) > 1 && " - Não disponível com parcelas"}
                 </Text>
             </TouchableOpacity>
             

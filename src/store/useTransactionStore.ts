@@ -1,35 +1,89 @@
 import uuid from 'react-native-uuid';
 import { create } from "zustand";
+import { MMKVStorageService } from '../services/MMKVStorage.service';
 import { RecurrenceType, RecurringTransaction } from "../shared/interfaces/recurringTransaction.interface";
 import { Transaction } from "../shared/interfaces/transaction.interface";
 import { TransactionState } from "../shared/interfaces/transactionState.interface";
+
+const storage = new MMKVStorageService();
+
+// Chaves para o storage
+const TRANSACTIONS_KEY = 'transactions';
+const RECURRING_TRANSACTIONS_KEY = 'recurring_transactions';
+
+// Função para carregar dados iniciais
+const loadInitialData = async () => {
+    try {
+        const [transactions, recurringTransactions] = await Promise.all([
+            storage.getItem<Transaction[]>(TRANSACTIONS_KEY),
+            storage.getItem<RecurringTransaction[]>(RECURRING_TRANSACTIONS_KEY)
+        ]);
+        
+        return {
+            transactions: transactions || [],
+            recurringTransactions: recurringTransactions || []
+        };
+    } catch (error) {
+        console.warn('Erro ao carregar dados do storage:', error);
+        return {
+            transactions: [],
+            recurringTransactions: []
+        };
+    }
+};
+
+// Função para salvar dados no storage
+const saveToStorage = async (key: string, data: any) => {
+    try {
+        await storage.setItem(key, data);
+    } catch (error) {
+        console.warn(`Erro ao salvar ${key} no storage:`, error);
+    }
+};
 
 export const useTransactionStore = create<TransactionState>((set, get) => ({
     transactions: [], 
     recurringTransactions: [],
     
+    // Método para carregar dados do storage
+    loadData: async () => {
+        const data = await loadInitialData();
+        set({
+            transactions: data.transactions,
+            recurringTransactions: data.recurringTransactions
+        });
+    },
+    
     addTransaction: (transaction: Transaction) =>
-        set((state) => ({
-            transactions: [...state.transactions, transaction],
-        })),
+        set((state) => {
+            const newTransactions = [...state.transactions, transaction];
+            saveToStorage(TRANSACTIONS_KEY, newTransactions);
+            return { transactions: newTransactions };
+        }),
         
     removeTransaction: (transactionId: string) =>
-        set((state) => ({
-            transactions: state.transactions.filter(transaction => transaction.id !== transactionId),
-        })),
+        set((state) => {
+            const newTransactions = state.transactions.filter(transaction => transaction.id !== transactionId);
+            saveToStorage(TRANSACTIONS_KEY, newTransactions);
+            return { transactions: newTransactions };
+        }),
         
     addRecurringTransaction: (recurringTransaction: RecurringTransaction) =>
-        set((state) => ({
-            recurringTransactions: [...state.recurringTransactions, recurringTransaction],
-        })),
+        set((state) => {
+            const newRecurringTransactions = [...state.recurringTransactions, recurringTransaction];
+            saveToStorage(RECURRING_TRANSACTIONS_KEY, newRecurringTransactions);
+            return { recurringTransactions: newRecurringTransactions };
+        }),
         
     removeRecurringTransaction: (transactionId: string) =>
-        set((state) => ({
-            recurringTransactions: state.recurringTransactions.filter(transaction => transaction.id !== transactionId),
-        })),
+        set((state) => {
+            const newRecurringTransactions = state.recurringTransactions.filter(transaction => transaction.id !== transactionId);
+            saveToStorage(RECURRING_TRANSACTIONS_KEY, newRecurringTransactions);
+            return { recurringTransactions: newRecurringTransactions };
+        }),
         
     generateRecurringTransactions: (month: number, year: number) => {
-        const { recurringTransactions } = get();
+        const { recurringTransactions, transactions } = get();
         const generatedTransactions: Transaction[] = [];
         
         recurringTransactions.forEach(recurring => {
@@ -61,23 +115,34 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
             }
             
             if (transactionDate) {
-                const transaction: Transaction = {
-                    id: uuid.v4() as string,
-                    type: recurring.type,
-                    title: `${recurring.title} (Recorrente)`,
-                    amount: recurring.amount,
-                    date: transactionDate,
-                    notes: recurring.notes,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                };
-                generatedTransactions.push(transaction);
+                // Verificar se já existe uma transação recorrente para este mês
+                const existingTransaction = transactions.find(t => 
+                    t.title.includes(`${recurring.title} (Recorrente)`) &&
+                    new Date(t.date).getMonth() === month - 1 &&
+                    new Date(t.date).getFullYear() === year
+                );
+                
+                if (!existingTransaction) {
+                    const transaction: Transaction = {
+                        id: uuid.v4() as string,
+                        type: recurring.type,
+                        title: `${recurring.title} (Recorrente)`,
+                        amount: recurring.amount,
+                        date: transactionDate,
+                        notes: recurring.notes,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    };
+                    generatedTransactions.push(transaction);
+                }
             }
         });
         
         if (generatedTransactions.length > 0) {
-            set((state) => ({
-                transactions: [...state.transactions, ...generatedTransactions],
+            const allTransactions = [...get().transactions, ...generatedTransactions];
+            saveToStorage(TRANSACTIONS_KEY, allTransactions);
+            set(() => ({
+                transactions: allTransactions,
             }));
         }
     },
@@ -110,8 +175,11 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
                 newTransactions.push(installmentTransaction);
             }
             
+            const allTransactions = [...state.transactions, ...newTransactions];
+            saveToStorage(TRANSACTIONS_KEY, allTransactions);
+            
             return {
-                transactions: [...state.transactions, ...newTransactions],
+                transactions: allTransactions,
             };
         }),
 }));

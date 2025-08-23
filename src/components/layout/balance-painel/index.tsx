@@ -18,7 +18,6 @@ export function BalancePainel({ selectedMonth }: BalancePainelProps) {
     const transactions = useTransactionStore(state => state.transactions);
     const generateRecurringTransactions = useTransactionStore(state => state.generateRecurringTransactions);
     
-    // Gerar transações recorrentes para o mês selecionado
     React.useEffect(() => {
         const currentYear = new Date().getFullYear();
         generateRecurringTransactions(selectedMonth, currentYear);
