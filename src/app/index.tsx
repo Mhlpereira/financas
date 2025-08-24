@@ -94,12 +94,24 @@ export default function Home() {
                 <BalancePainel selectedMonth={selectedMonth} />
             </Animated.View>
             
-            <View style={homeStyles.expenseSection}>
+            <Animated.View 
+                style={[
+                    homeStyles.expenseSection,
+                    {
+                        transform: [{
+                            translateY: balanceAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, -50],
+                            })
+                        }]
+                    }
+                ]}
+            >
                 <ExpenseManager 
                     selectedMonth={selectedMonth}
                     onScroll={handleScroll}
                 />
-            </View>
+            </Animated.View>
 
             <NewButton
                 iconName="plus"
