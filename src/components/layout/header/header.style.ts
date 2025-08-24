@@ -50,13 +50,10 @@ export const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "600",
         color: colors.white,
-        marginRight: 4,
     },
     rightSection: {
         position: "relative",
-    },
-    dropdownIcon: {
-        marginLeft: 4,
+        zIndex: 1000,
     },
     dropdown: {
         position: "absolute",
@@ -65,12 +62,12 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: 12,
         minWidth: 160,
-        elevation: 8,
+        elevation: 100,
         shadowColor: colors.gray600,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
+        shadowOpacity: 0.25,
         shadowRadius: 12,
-        zIndex: 1000,
+        zIndex: 10000,
     },
     dropdownItem: {
         flexDirection: "row",

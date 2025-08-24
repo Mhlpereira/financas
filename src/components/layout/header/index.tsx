@@ -90,12 +90,6 @@ export const Header = () => {
                         <Text style={styles.avatarText}>
                             {getInitials(displayName)}
                         </Text>
-                        <Icon 
-                            name={showDropdown ? "up" : "down"} 
-                            size={12} 
-                            color="#6b7280" 
-                            style={styles.dropdownIcon}
-                        />
                     </TouchableOpacity>
                     
                     {showDropdown && (

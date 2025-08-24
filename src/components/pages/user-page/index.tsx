@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useNavigationStore } from "../../../store/useNavigationStore";
 import { useSalaryStore } from "../../../store/useSalaryStore";
 import { colors } from "../../../themes";
 import { formatCurrency } from "../../../utils/formatCurrency";
@@ -12,33 +11,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
-    },
-    header: {
-        backgroundColor: colors.primary,
-        paddingTop: 60,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: colors.white,
-        textAlign: "center",
-        flex: 1,
-    },
-    placeholder: {
-        width: 40,
+        paddingTop: 20,
     },
     section: {
         margin: 20,
@@ -109,7 +82,6 @@ const styles = StyleSheet.create({
 
 export const UserPage: React.FC = () => {
     const { salary, updateSalary, deleteSalary, getSalary } = useSalaryStore();
-    const { setCurrentPage } = useNavigationStore();
     const [showSalaryForm, setShowSalaryForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -164,17 +136,6 @@ export const UserPage: React.FC = () => {
 
     return (
         <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <NewButton
-                    iconName="arrowleft"
-                    variant="secondary"
-                    onPress={() => setCurrentPage('home')}
-                    style={styles.backButton}
-                />
-                <Text style={styles.title}>Gerenciar Usuário</Text>
-                <View style={styles.placeholder} />
-            </View>
-
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Salário</Text>
                 
