@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Alert, StyleSheet } from "react-native";
-import { NewButton } from "../../ui/button";
-import { formatCurrency } from "../../../utils/formatCurrency";
+import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import { colors } from "../../../themes";
+import { formatCurrency } from "../../../utils/formatCurrency";
+import { NewButton } from "../../ui/button";
 
 interface ISalaryFormProps {
     initialAmount?: number;

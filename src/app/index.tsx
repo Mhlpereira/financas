@@ -4,11 +4,11 @@ import { BalancePainel } from '../components/layout/balance-painel'
 import { ExpenseManager } from '../components/layout/expense-manager'
 import { Header } from '../components/layout/header'
 import { NavMonths } from '../components/layout/nav-months'
+import { UserPage } from '../components/pages/user-page'
 import { NewButton } from '../components/ui/button'
 import { CustomModal } from '../components/ui/modal'
-import { UserPage } from '../components/pages/user-page'
-import { useTransactionStore } from '../store/useTransactionStore'
 import { useNavigationStore } from '../store/useNavigationStore'
+import { useTransactionStore } from '../store/useTransactionStore'
 import { homeStyles } from './home.styles'
 
 export default function Home() {

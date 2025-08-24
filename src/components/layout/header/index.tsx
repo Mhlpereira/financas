@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Text, TouchableOpacity, View, Alert } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Icon from 'react-native-vector-icons/AntDesign';
 import { useNameStore } from "../../../store/useNameStore";
-import { useTransactionStore } from "../../../store/useTransactionStore";
 import { useNavigationStore } from "../../../store/useNavigationStore";
+import { useTransactionStore } from "../../../store/useTransactionStore";
 import { styles } from "./header.style";
 
 export const Header = () => {

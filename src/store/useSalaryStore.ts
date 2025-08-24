@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { ISalary, ISalaryState } from "../shared/interfaces/salary.interface";
 import { MMKVStorageService } from "../services/MMKVStorage.service";
+import { ISalary, ISalaryState } from "../shared/interfaces/salary.interface";
 
 const SALARY_KEY = "@finances:salary";
 const storageService = new MMKVStorageService();

@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ScrollView, Alert, StyleSheet } from "react-native";
-import { NewButton } from "../../ui/button";
-import { SalaryForm } from "../../ui/salary-form";
-import { CustomModal } from "../../ui/modal";
-import { useSalaryStore } from "../../../store/useSalaryStore";
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useNavigationStore } from "../../../store/useNavigationStore";
-import { formatCurrency } from "../../../utils/formatCurrency";
+import { useSalaryStore } from "../../../store/useSalaryStore";
 import { colors } from "../../../themes";
+import { formatCurrency } from "../../../utils/formatCurrency";
+import { NewButton } from "../../ui/button";
+import { CustomModal } from "../../ui/modal";
+import { SalaryForm } from "../../ui/salary-form";
 
 const styles = StyleSheet.create({
     container: {
