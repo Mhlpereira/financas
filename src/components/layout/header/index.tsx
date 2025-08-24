@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View, Alert } from "react-native";
 import Icon from 'react-native-vector-icons/AntDesign';
 import { useNameStore } from "../../../store/useNameStore";
 import { useTransactionStore } from "../../../store/useTransactionStore";
+import { useNavigationStore } from "../../../store/useNavigationStore";
 import { styles } from "./header.style";
 
 export const Header = () => {
     const { userName } = useNameStore();
+    const { setCurrentPage } = useNavigationStore();
     const [showDropdown, setShowDropdown] = useState(false);
     const { clearAllData } = useTransactionStore();
     
@@ -44,6 +46,7 @@ export const Header = () => {
     const handleMenuOption = (option: string) => {
         switch (option) {
             case 'user':
+                setCurrentPage('user');
                 setShowDropdown(false);
                 break;
             case 'settings':
