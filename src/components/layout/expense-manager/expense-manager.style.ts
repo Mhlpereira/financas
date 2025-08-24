@@ -26,10 +26,11 @@ export const styles = StyleSheet.create({
         marginLeft: 12,
     },
     listContainer: {
-        padding: 16,
+        padding: 12,
+        paddingBottom: 100,
     },
     card: {
-        marginVertical: 6,
+        marginVertical: 4,
         backgroundColor: colors.surface,
         borderRadius: 12,
         elevation: 3,
@@ -44,7 +45,7 @@ export const styles = StyleSheet.create({
     row: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 16,
+        padding: 14,
     },
     iconContainer: {
         width: 44,
@@ -78,16 +79,19 @@ export const styles = StyleSheet.create({
         fontWeight: "600",
         color: colors.text,
         marginBottom: 2,
+        lineHeight: 20,
     },
     date: {
         fontSize: 13,
         color: colors.textSecondary,
+        lineHeight: 16,
     },
     value: {
         fontSize: 16,
         fontWeight: "700",
         textAlign: "right",
         marginBottom: 2,
+        lineHeight: 20,
     },
     incomeValue: {
         color: colors.success,
@@ -96,9 +100,10 @@ export const styles = StyleSheet.create({
         color: colors.danger,
     },
     installment: {
-        fontSize: 12,
+        fontSize: 13,
         color: colors.textSecondary,
         textAlign: "right",
+        lineHeight: 16,
     },
     emptyContainer: {
         flex: 1,

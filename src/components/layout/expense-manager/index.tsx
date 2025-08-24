@@ -7,9 +7,10 @@ import { styles } from './expense-manager.style';
 
 interface ExpenseManagerProps {
     selectedMonth: number;
+    onScroll?: (scrollY: number) => void;
 }
 
-export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
+export function ExpenseManager({ selectedMonth, onScroll }: ExpenseManagerProps) {
     const transactions = useTransactionStore(state => state.transactions);
     const recurringTransactions = useTransactionStore(state => state.recurringTransactions);
     const removeTransaction = useTransactionStore(state => state.removeTransaction);
@@ -108,7 +109,7 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
                                 : handleDeleteTransaction(item)
                             }
                         >
-                            <Icon name="delete" size={16} color="#dc2626" />
+                            <Icon name="delete" size={18} color="#dc2626" />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -163,8 +164,20 @@ export function ExpenseManager({ selectedMonth }: ExpenseManagerProps) {
                 ListEmptyComponent={renderEmptyList}
                 contentContainerStyle={styles.listContainer}
                 showsVerticalScrollIndicator={false}
-                initialNumToRender={8}
-                maxToRenderPerBatch={10}
+                initialNumToRender={12}
+                maxToRenderPerBatch={15}
+                windowSize={10}
+                removeClippedSubviews={true}
+                getItemLayout={(data, index) => ({
+                    length: 70,
+                    offset: 70 * index,
+                    index,
+                })}
+                onScroll={onScroll ? (event) => {
+                    const scrollY = event.nativeEvent.contentOffset.y;
+                    onScroll(scrollY);
+                } : undefined}
+                scrollEventThrottle={16}
             />
         </View>
     );

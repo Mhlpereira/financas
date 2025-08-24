@@ -36,4 +36,12 @@ export const homeStyles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 8,
     },
+    expenseSection: {
+        flex: 1,
+        paddingTop: 8,
+    },
+    navContainer: {
+        zIndex: 10,
+        elevation: 5,
+    },
 });

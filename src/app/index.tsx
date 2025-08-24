@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { Animated, View } from 'react-native'
 import { BalancePainel } from '../components/layout/balance-painel'
 import { ExpenseManager } from '../components/layout/expense-manager'
 import { Header } from '../components/layout/header'
@@ -13,26 +13,92 @@ export default function Home() {
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const loadData = useTransactionStore(state => state.loadData);
+    
+    const navAnimation = useRef(new Animated.Value(1)).current;
+    const balanceAnimation = useRef(new Animated.Value(0)).current;
+    const lastScrollY = useRef(0);
 
     useEffect(() => {
-        // Carregar dados persistidos quando o app inicializar
         loadData();
     }, [loadData]);
+
+    const handleScroll = (scrollY: number) => {
+        const currentScrollY = scrollY;
+        const scrollDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
+        const threshold = 30;
+        
+        if (scrollDirection === 'down' && currentScrollY > threshold) {
+            Animated.parallel([
+                Animated.timing(navAnimation, {
+                    toValue: 0,
+                    duration: 250,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(balanceAnimation, {
+                    toValue: 1,
+                    duration: 250,
+                    useNativeDriver: true,
+                })
+            ]).start();
+        } else if (scrollDirection === 'up' || currentScrollY <= threshold) {
+            Animated.parallel([
+                Animated.timing(navAnimation, {
+                    toValue: 1,
+                    duration: 250,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(balanceAnimation, {
+                    toValue: 0,
+                    duration: 250,
+                    useNativeDriver: true,
+                })
+            ]).start();
+        }
+        
+        lastScrollY.current = currentScrollY;
+    };
 
     return (
         <View style={homeStyles.container}>
             <Header />
-            <NavMonths 
-                selectedMonth={selectedMonth}
-                onMonthChange={setSelectedMonth}
-            />
+            <Animated.View 
+                style={[
+                    homeStyles.navContainer,
+                    {
+                        opacity: navAnimation,
+                        transform: [{
+                            translateY: navAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-60, 0],
+                            })
+                        }]
+                    }
+                ]}
+            >
+                <NavMonths 
+                    selectedMonth={selectedMonth}
+                    onMonthChange={setSelectedMonth}
+                />
+            </Animated.View>
             
-            <View style={homeStyles.section}>
+            <Animated.View
+                style={{
+                    transform: [{
+                        translateY: balanceAnimation.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -50],
+                        })
+                    }]
+                }}
+            >
                 <BalancePainel selectedMonth={selectedMonth} />
-            </View>
+            </Animated.View>
             
-            <View style={{ flex: 1 }}>
-                <ExpenseManager selectedMonth={selectedMonth} />
+            <View style={homeStyles.expenseSection}>
+                <ExpenseManager 
+                    selectedMonth={selectedMonth}
+                    onScroll={handleScroll}
+                />
             </View>
 
             <NewButton
