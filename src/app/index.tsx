@@ -112,6 +112,7 @@ export default function Home() {
             <CustomModal 
                 visible={isModalVisible}
                 onClose={() => setModalVisible(false)}
+                selectedMonth={selectedMonth}
             />
         </View>
     )

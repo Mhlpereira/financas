@@ -8,9 +8,10 @@ type CustomModalProps = {
     onClose: () => void
     title?: string
     children?: React.ReactNode
+    selectedMonth?: number
 }
 
-export function CustomModal({ visible, onClose, title = "Novo lançamento", children }: CustomModalProps) {
+export function CustomModal({ visible, onClose, title = "Novo lançamento", children, selectedMonth }: CustomModalProps) {
     return (
         <Modal
             transparent
@@ -27,7 +28,7 @@ export function CustomModal({ visible, onClose, title = "Novo lançamento", chil
                         </Pressable>
                     </View>
                     <View style={styles.modalContent}>
-                        {children || <ExpenseForm onSuccess={onClose} />}
+                        {children || <ExpenseForm onSuccess={onClose} selectedMonth={selectedMonth} />}
                     </View>
                 </View>
             </View>

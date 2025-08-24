@@ -13,6 +13,7 @@ import { styles } from './expense-form.style'
 
 interface ExpenseFormProps {
     onSuccess?: () => void;
+    selectedMonth?: number;
 }
 
 const CATEGORIES = [
@@ -26,7 +27,16 @@ const CATEGORIES = [
     { id: 'other', name: 'Outros', icon: 'ellipsis1' },
 ];
 
-export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
+export function ExpenseForm({ onSuccess, selectedMonth }: ExpenseFormProps) {
+    const getDefaultDate = () => {
+        if (selectedMonth) {
+            const currentYear = new Date().getFullYear();
+            const defaultDate = new Date(currentYear, selectedMonth - 1, 1);
+            return defaultDate.toLocaleDateString('pt-BR');
+        }
+        return getToday();
+    };
+
     const {
         control,
         handleSubmit,
@@ -35,7 +45,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
     } = useForm<FieldValues>({
         defaultValues: {
             installments: '',
-            date: getToday(),
+            date: getDefaultDate(),
             category: 'other',
         },
     })
@@ -97,7 +107,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
             title: '',
             value: '',
             installments: '1',
-            date: getToday(),
+            date: getDefaultDate(),
             category: 'other',
         });
 
