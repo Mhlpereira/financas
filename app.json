@@ -4,20 +4,24 @@
     "slug": "finances",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon-optimized.png",
     "scheme": "finances",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mh.finances",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon-optimized.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.mh.finances"
+      "package": "com.mh.finances",
+      "enableAbiSplit": true,
+      "enableProguardInReleaseBuilds": true
     },
     "web": {
       "bundler": "metro",

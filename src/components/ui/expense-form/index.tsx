@@ -44,7 +44,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
     const addTransactionWithInstallments = useTransactionStore((state) => state.addTransactionWithInstallments);
     const addRecurringTransaction = useTransactionStore((state) => state.addRecurringTransaction);
 
-    const [type, setType] = React.useState<TransactionType>(TransactionType.INCOME)
+    const [type, setType] = React.useState<TransactionType>(TransactionType.EXPENSE)
     const [isRecurring, setIsRecurring] = React.useState(false)
     const [showCategoryModal, setShowCategoryModal] = React.useState(false)
     const [selectedCategory, setSelectedCategory] = React.useState(CATEGORIES[0]) 
@@ -58,12 +58,14 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
             transactionDate = new Date(year, month - 1, day);
         }
         
+        const numericValue = Number(data.value.replace(',', '.'));
+        
         if (isRecurring) {
             const recurringTransaction = {
                 id: uuid.v4() as string,
                 type,
                 title: data.title,
-                amount: Number(data.value),
+                amount: numericValue,
                 recurrenceType: 'monthly' as any, 
                 dayOfMonth: transactionDate.getDate(),
                 isActive: true,
@@ -78,7 +80,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                 id: uuid.v4() as string,
                 type,
                 title: data.title,
-                amount: Number(data.value),
+                amount: numericValue,
                 date: transactionDate, 
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -99,7 +101,7 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
             category: 'other',
         });
 
-        setType(TransactionType.INCOME);
+        setType(TransactionType.EXPENSE);
         setIsRecurring(false);
         setSelectedCategory(CATEGORIES[7]);
 
@@ -203,8 +205,8 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                     rules={{
                         required: 'Valor é obrigatório',
                         pattern: {
-                            value: /^[0-9]+$/,
-                            message: 'Valor deve ser um número',
+                            value: /^[0-9]+([.,][0-9]{0,2})?$/,
+                            message: 'Valor deve ser um número válido (ex: 13,00 ou 13.00)',
                         },
                     }}
                     render={({
@@ -216,9 +218,16 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
                         }
                     }) => (
                         <TextInput
-                            placeholder="Valor"
+                            placeholder="Valor (ex: 13,00)"
                             value={value}
-                            onChangeText={onChange}
+                            onChangeText={(text) => {
+                                const cleanText = text.replace(/[^0-9.,]/g, '');
+                                const normalizedText = cleanText.replace(',', '.');
+                                const parts = normalizedText.split('.');
+                                if (parts.length > 2) return;
+                                if (parts[1] && parts[1].length > 2) return;
+                                onChange(cleanText);
+                            }}
                             keyboardType="numeric"
                             style={styles.inputFlex}
                         />

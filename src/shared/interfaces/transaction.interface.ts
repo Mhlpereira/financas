@@ -11,6 +11,7 @@ export interface Transaction {
     date: Date;
     isInstalment?: boolean;
     installments?: Installment[];
+    recurringTransactionId?: string;
     notes?: string;
     createdAt: Date;
     updatedAt: Date;

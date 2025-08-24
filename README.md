@@ -22,6 +22,21 @@ SECRET_KEY
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
-## Comando para executa
+## Comando para executar
 
+### Desenvolvimento Local
+```bash
 npx expo start
+```
+
+### Builds para teste
+```bash
+# Android APK
+npx eas build --platform android --profile standalone
+
+# iOS (requer conta Apple Developer)
+npx eas build --platform ios --profile standalone
+
+# Ambas as plataformas
+npx eas build --platform all --profile standalone
+```

@@ -72,7 +72,6 @@ export function RecurringTransactionForm({ onSuccess }: RecurringTransactionForm
 
         addRecurringTransaction(recurringTransaction);
 
-        // Limpar o formulário após salvar
         reset({
             title: '',
             amount: '',
@@ -87,11 +86,9 @@ export function RecurringTransactionForm({ onSuccess }: RecurringTransactionForm
             notes: '',
         });
 
-        // Resetar o tipo para entrada
         setType(TransactionType.INCOME);
         setRecurrenceType(RecurrenceType.MONTHLY);
 
-        // Chamar callback de sucesso se fornecido
         if (onSuccess) {
             onSuccess();
         }

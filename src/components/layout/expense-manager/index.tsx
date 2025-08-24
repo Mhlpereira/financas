@@ -15,6 +15,8 @@ export function ExpenseManager({ selectedMonth, onScroll }: ExpenseManagerProps)
     const recurringTransactions = useTransactionStore(state => state.recurringTransactions);
     const removeTransaction = useTransactionStore(state => state.removeTransaction);
     const removeRecurringTransaction = useTransactionStore(state => state.removeRecurringTransaction);
+    const removeRecurringTransactionInstance = useTransactionStore(state => state.removeRecurringTransactionInstance);
+    const removeAllFutureRecurringTransactions = useTransactionStore(state => state.removeAllFutureRecurringTransactions);
     
     const [showRecurring, setShowRecurring] = useState(false);
     
@@ -24,26 +26,48 @@ export function ExpenseManager({ selectedMonth, onScroll }: ExpenseManagerProps)
     });
 
     const filteredRecurringTransactions = recurringTransactions.filter(item => {
-        // Mostrar todas as transações recorrentes independente do mês
         return true;
     });
 
     const handleDeleteTransaction = (item: any) => {
-        Alert.alert(
-            "Excluir lançamento",
-            `Você deseja excluir "${item.title}"?`,
-            [
-                {
-                    text: "Não",
-                    style: "cancel"
-                },
-                {
-                    text: "Sim",
-                    style: "destructive",
-                    onPress: () => removeTransaction(item.id)
-                }
-            ]
-        );
+        if (item.recurringTransactionId) {
+            Alert.alert(
+                "Excluir lançamento recorrente",
+                `Como você deseja excluir "${item.title}"?`,
+                [
+                    {
+                        text: "Cancelar",
+                        style: "cancel"
+                    },
+                    {
+                        text: "Apenas este",
+                        style: "default",
+                        onPress: () => removeRecurringTransactionInstance(item.id)
+                    },
+                    {
+                        text: "Este e futuros",
+                        style: "destructive",
+                        onPress: () => removeAllFutureRecurringTransactions(item.recurringTransactionId, new Date(item.date))
+                    }
+                ]
+            );
+        } else {
+            Alert.alert(
+                "Excluir lançamento",
+                `Você deseja excluir "${item.title}"?`,
+                [
+                    {
+                        text: "Não",
+                        style: "cancel"
+                    },
+                    {
+                        text: "Sim",
+                        style: "destructive",
+                        onPress: () => removeTransaction(item.id)
+                    }
+                ]
+            );
+        }
     };
 
     const handleDeleteRecurringTransaction = (item: any) => {

@@ -10,5 +10,7 @@ export interface TransactionState {
   addTransactionWithInstallments: (transaction: Transaction, installments: number) => void
   addRecurringTransaction: (transaction: RecurringTransaction) => void
   removeRecurringTransaction: (transactionId: string) => void
+  removeRecurringTransactionInstance: (transactionId: string) => void
+  removeAllFutureRecurringTransactions: (recurringTransactionId: string, currentTransactionDate: Date) => void
   generateRecurringTransactions: (month: number, year: number) => void
 }
