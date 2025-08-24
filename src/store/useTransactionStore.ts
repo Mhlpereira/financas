@@ -208,4 +208,14 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
                 transactions: allTransactions,
             };
         }),
+        
+    clearAllData: () =>
+        set(() => {
+            saveToStorage(TRANSACTIONS_KEY, []);
+            saveToStorage(RECURRING_TRANSACTIONS_KEY, []);
+            return { 
+                transactions: [], 
+                recurringTransactions: [] 
+            };
+        }),
 }));
