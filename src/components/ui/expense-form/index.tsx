@@ -29,12 +29,16 @@ const CATEGORIES = [
 
 export function ExpenseForm({ onSuccess, selectedMonth }: ExpenseFormProps) {
     const getDefaultDate = () => {
-        if (selectedMonth) {
-            const currentYear = new Date().getFullYear();
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // getMonth() retorna 0-11, então +1
+        const currentYear = today.getFullYear();
+        
+        if (selectedMonth && selectedMonth !== currentMonth) {
             const defaultDate = new Date(currentYear, selectedMonth - 1, 1);
             return defaultDate.toLocaleDateString('pt-BR');
+        } else {
+            return getToday();
         }
-        return getToday();
     };
 
     const {
