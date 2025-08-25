@@ -4,11 +4,12 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import { useNameStore } from "../../../store/useNameStore";
 import { useNavigationStore } from "../../../store/useNavigationStore";
 import { useTransactionStore } from "../../../store/useTransactionStore";
+import { colors } from "../../../themes";
 import { styles } from "./header.style";
 
 export const Header = () => {
     const { userName } = useNameStore();
-    const { setCurrentPage } = useNavigationStore();
+    const { setCurrentPage, currentPage } = useNavigationStore();
     const [showDropdown, setShowDropdown] = useState(false);
     const { clearAllData } = useTransactionStore();
     
@@ -77,10 +78,25 @@ export const Header = () => {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <View style={styles.greeting}>
-                    <Text style={styles.welcomeText}>Bem-vindo de volta</Text>
-                    <Text style={styles.userName}>{displayName}!</Text>
-                </View>
+                {currentPage === 'user' ? (
+                    <TouchableOpacity 
+                        style={styles.backButton}
+                        onPress={() => setCurrentPage('home')}
+                    >
+                        <Icon name="arrowleft" size={20} color={colors.white} />
+                    </TouchableOpacity>
+                ) : (
+                    <View style={styles.greeting}>
+                        <Text style={styles.welcomeText}>Bem-vindo de volta</Text>
+                        <Text style={styles.userName}>{displayName}!</Text>
+                    </View>
+                )}
+                
+                {currentPage === 'user' && (
+                    <View style={styles.centerTitle}>
+                        <Text style={styles.pageTitle}>Gerenciar Usuário</Text>
+                    </View>
+                )}
                 
                 <View style={styles.rightSection}>
                     <TouchableOpacity 

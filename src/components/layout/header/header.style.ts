@@ -14,6 +14,7 @@ export const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
         shadowRadius: 12,
+        zIndex: 999,
     },
     content: {
         flexDirection: "row",
@@ -53,7 +54,7 @@ export const styles = StyleSheet.create({
     },
     rightSection: {
         position: "relative",
-        zIndex: 1000,
+        zIndex: 99999,
     },
     dropdown: {
         position: "absolute",
@@ -62,12 +63,12 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: 12,
         minWidth: 160,
-        elevation: 100,
+        elevation: 999,
         shadowColor: colors.gray600,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 12,
-        zIndex: 10000,
+        zIndex: 99999,
     },
     dropdownItem: {
         flexDirection: "row",
@@ -85,5 +86,23 @@ export const styles = StyleSheet.create({
     },
     logoutText: {
         color: colors.danger,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    centerTitle: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    pageTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: colors.white,
+        textAlign: "center",
     },
 });

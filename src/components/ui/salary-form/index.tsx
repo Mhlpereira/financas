@@ -76,7 +76,7 @@ export const SalaryForm: React.FC<ISalaryFormProps> = ({
     onCancel,
     isEditing = false
 }) => {
-    const [amount, setAmount] = useState(initialAmount.toString());
+    const [amount, setAmount] = useState((initialAmount * 100).toString()); // Multiplicar por 100 para ter os centavos
 
     const handleAmountChange = (text: string) => {
         const numericValue = text.replace(/[^0-9]/g, "");
@@ -84,7 +84,7 @@ export const SalaryForm: React.FC<ISalaryFormProps> = ({
     };
 
     const handleSave = () => {
-        const numericAmount = parseFloat(amount);
+        const numericAmount = parseFloat(amount) / 100; // Dividir por 100 para corrigir o valor
         
         if (isNaN(numericAmount) || numericAmount <= 0) {
             Alert.alert("Erro", "Por favor, insira um valor válido para o salário.");
