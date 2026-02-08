@@ -1,85 +1,65 @@
+import { useMonthlyTransactions } from '@/src/hooks/useTransactionSelectors'
+import { Frequency, TransactionType } from '@/src/shared/enums/transaction.enum'
+import { Transaction } from '@/src/shared/interfaces/transaction.interface'
 import { useTransactionStore } from '@/src/store/useTransaction.store'
+import { useUIStore } from '@/src/store/useUI.store'
 import { formatCurrencySimple } from '@/src/utils/formatCurrency'
-import { useState } from 'react'
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native'
 import Icon from 'react-native-vector-icons/AntDesign'
 import { styles } from './expense-manager.style'
 
 interface ExpenseManagerProps {
-    selectedMonth: number
     onScroll?: (scrollY: number) => void
 }
 
-export function ExpenseManager({
-    selectedMonth,
-    onScroll,
-}: ExpenseManagerProps) {
-    const transactions = useTransactionStore((state) => state.transactions)
-    const recurringTransactions = useTransactionStore(
-        (state) => state.recurringTransactions,
+const frequencyLabels: Record<Frequency, string> = {
+    [Frequency.ONE_TIME]: 'Único',
+    [Frequency.MONTHLY]: 'Mensal',
+    [Frequency.WEEKLY]: 'Semanal',
+    [Frequency.YEARLY]: 'Anual',
+}
+
+export function ExpenseManager({ onScroll }: ExpenseManagerProps) {
+    const selectedMonth = useUIStore((s) => s.selectedMonth)
+    const selectedYear = useUIStore((s) => s.selectedYear)
+
+    const monthlyTransactions = useMonthlyTransactions(
+        selectedMonth,
+        selectedYear,
     )
+
     const removeTransaction = useTransactionStore(
         (state) => state.removeTransaction,
     )
-    const removeRecurringTransaction = useTransactionStore(
-        (state) => state.removeRecurringTransaction,
-    )
-    const removeRecurringTransactionInstance = useTransactionStore(
-        (state) => state.removeRecurringTransactionInstance,
-    )
-    const removeAllFutureRecurringTransactions = useTransactionStore(
-        (state) => state.removeAllFutureRecurringTransactions,
+    const removeAllInstallments = useTransactionStore(
+        (state) => state.removeAllInstallments,
     )
 
-    const [showRecurring, setShowRecurring] = useState(false)
-
-    const filteredTransactions = transactions.filter((item) => {
-        const itemDate = new Date(item.date)
-        return itemDate.getMonth() + 1 === selectedMonth
-    })
-
-    const filteredRecurringTransactions = recurringTransactions.filter(
-        (item) => {
-            return true
-        },
-    )
-
-    const handleDeleteTransaction = (item: any) => {
-        if (item.recurringTransactionId) {
+    const handleDeleteTransaction = (item: Transaction) => {
+        if (item.parentId) {
             Alert.alert(
-                'Excluir lançamento recorrente',
-                `Como você deseja excluir "${item.title}"?`,
+                'Excluir parcelamento',
+                `Como você deseja excluir "${item.description}"?`,
                 [
+                    { text: 'Cancelar', style: 'cancel' },
                     {
-                        text: 'Cancelar',
-                        style: 'cancel',
-                    },
-                    {
-                        text: 'Apenas este',
+                        text: 'Apenas esta parcela',
                         style: 'default',
-                        onPress: () =>
-                            removeRecurringTransactionInstance(item.id),
+                        onPress: () => removeTransaction(item.id),
                     },
                     {
-                        text: 'Este e futuros',
+                        text: 'Todas as parcelas',
                         style: 'destructive',
-                        onPress: () =>
-                            removeAllFutureRecurringTransactions(
-                                item.recurringTransactionId,
-                                new Date(item.date),
-                            ),
+                        onPress: () => removeAllInstallments(item.parentId!),
                     },
                 ],
             )
         } else {
             Alert.alert(
                 'Excluir lançamento',
-                `Você deseja excluir "${item.title}"?`,
+                `Você deseja excluir "${item.description}"?`,
                 [
-                    {
-                        text: 'Não',
-                        style: 'cancel',
-                    },
+                    { text: 'Não', style: 'cancel' },
                     {
                         text: 'Sim',
                         style: 'destructive',
@@ -90,50 +70,53 @@ export function ExpenseManager({
         }
     }
 
-    const handleDeleteRecurringTransaction = (item: any) => {
-        Alert.alert(
-            'Excluir transação recorrente',
-            `Você deseja excluir "${item.title}"?\nIsso impedirá a criação futura dessa transação.`,
-            [
-                {
-                    text: 'Não',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Sim',
-                    style: 'destructive',
-                    onPress: () => removeRecurringTransaction(item.id),
-                },
-            ],
-        )
+    const getSubtitle = (item: Transaction): string => {
+        const date = new Date(item.startDate).toLocaleDateString('pt-BR')
+        const parts: string[] = [date]
+
+        if (item.frequency !== Frequency.ONE_TIME) {
+            parts.push(frequencyLabels[item.frequency])
+        }
+
+        if (item.installments && item.currentInstallment) {
+            parts.push(`${item.currentInstallment}/${item.installments}`)
+        }
+
+        return parts.join(' • ')
     }
 
-    const renderTransactionItem = ({ item }: { item: any }) => (
+    const renderTransactionItem = ({ item }: { item: Transaction }) => (
         <TouchableOpacity style={styles.card} onPress={() => {}}>
             <View style={styles.row}>
                 <View
                     style={[
                         styles.iconContainer,
-                        item.type === 'income'
+                        item.type === TransactionType.INCOME
                             ? styles.incomeIcon
                             : styles.expenseIcon,
                     ]}
                 >
                     <Icon
-                        name={item.type === 'income' ? 'arrowup' : 'arrowdown'}
+                        name={
+                            item.type === TransactionType.INCOME
+                                ? 'arrowup'
+                                : 'arrowdown'
+                        }
                         size={20}
-                        color={item.type === 'income' ? '#059669' : '#dc2626'}
+                        color={
+                            item.type === TransactionType.INCOME
+                                ? '#059669'
+                                : '#dc2626'
+                        }
                     />
                 </View>
 
                 <View style={styles.contentContainer}>
                     <View style={styles.descriptionCol}>
-                        <Text style={styles.description}>{item.title}</Text>
-                        <Text style={styles.date}>
-                            {showRecurring
-                                ? `Recorrência: ${item.recurrenceType}`
-                                : `${new Date(item.date).toLocaleDateString('pt-BR')}${item.isInstalment ? ' • Parcelado' : ''}`}
+                        <Text style={styles.description}>
+                            {item.description}
                         </Text>
+                        <Text style={styles.date}>{getSubtitle(item)}</Text>
                     </View>
 
                     <View style={styles.actionsContainer}>
@@ -141,26 +124,27 @@ export function ExpenseManager({
                             <Text
                                 style={[
                                     styles.value,
-                                    item.type === 'income'
+                                    item.type === TransactionType.INCOME
                                         ? styles.incomeValue
                                         : styles.expenseValue,
                                 ]}
                             >
-                                {item.type === 'income' ? '+' : '-'}
+                                {item.type === TransactionType.INCOME
+                                    ? '+'
+                                    : '-'}
                                 {formatCurrencySimple(item.amount)}
                             </Text>
-                            {item.isInstalment && (
-                                <Text style={styles.installment}>Parcela</Text>
+                            {item.installments && (
+                                <Text style={styles.installment}>
+                                    Parcela {item.currentInstallment}/
+                                    {item.installments}
+                                </Text>
                             )}
                         </View>
 
                         <TouchableOpacity
                             style={styles.deleteButton}
-                            onPress={() =>
-                                showRecurring
-                                    ? handleDeleteRecurringTransaction(item)
-                                    : handleDeleteTransaction(item)
-                            }
+                            onPress={() => handleDeleteTransaction(item)}
                         >
                             <Icon name="delete" size={18} color="#dc2626" />
                         </TouchableOpacity>
@@ -174,9 +158,7 @@ export function ExpenseManager({
         <View style={styles.emptyContainer}>
             <Icon name="inbox" size={48} color="#9ca3af" />
             <Text style={styles.emptyText}>
-                {showRecurring
-                    ? 'Nenhuma transação recorrente cadastrada'
-                    : 'Nenhuma transação encontrada para este mês'}
+                Nenhuma transação encontrada para este mês
             </Text>
         </View>
     )
@@ -185,52 +167,11 @@ export function ExpenseManager({
         <View style={styles.container}>
             <View style={styles.header}>
                 <Icon name="bars" size={24} color="#1f2937" />
-                <Text style={styles.headerTitle}>
-                    {showRecurring ? 'Recorrentes' : 'Lançamentos'}
-                </Text>
-                <View style={{ flex: 1 }} />
-
-                <TouchableOpacity
-                    style={[
-                        styles.toggleButton,
-                        !showRecurring && styles.activeToggle,
-                    ]}
-                    onPress={() => setShowRecurring(false)}
-                >
-                    <Text
-                        style={[
-                            styles.toggleText,
-                            !showRecurring && styles.activeToggleText,
-                        ]}
-                    >
-                        Normal
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[
-                        styles.toggleButton,
-                        showRecurring && styles.activeToggle,
-                    ]}
-                    onPress={() => setShowRecurring(true)}
-                >
-                    <Text
-                        style={[
-                            styles.toggleText,
-                            showRecurring && styles.activeToggleText,
-                        ]}
-                    >
-                        Recorrente
-                    </Text>
-                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Lançamentos</Text>
             </View>
 
             <FlatList
-                data={
-                    showRecurring
-                        ? filteredRecurringTransactions
-                        : filteredTransactions
-                }
+                data={monthlyTransactions}
                 keyExtractor={(item) => item.id}
                 renderItem={renderTransactionItem}
                 ListEmptyComponent={renderEmptyList}

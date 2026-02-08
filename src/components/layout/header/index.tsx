@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { Alert, Text, TouchableOpacity, View } from 'react-native'
 import Icon from 'react-native-vector-icons/AntDesign'
-import { useNameStore } from '../../../store/useNameStore'
-import { useNavigationStore } from '../../../store/useNavigationStore'
 import { useTransactionStore } from '../../../store/useTransaction.store'
+import { useUIStore } from '../../../store/useUI.store'
 import { colors } from '../../../themes'
 import { styles } from './header.style'
 
 export const Header = () => {
-    const { userName } = useNameStore()
-    const { setCurrentPage, currentPage } = useNavigationStore()
+    const userName = useUIStore((s) => s.userName)
+    const currentPage = useUIStore((s) => s.currentPage)
+    const setCurrentPage = useUIStore((s) => s.setCurrentPage)
     const [showDropdown, setShowDropdown] = useState(false)
     const { clearAllData } = useTransactionStore()
 

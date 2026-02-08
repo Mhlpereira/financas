@@ -1,13 +1,8 @@
-import { TransactionType } from '@/src/shared/enums/transaction.enum'
-import { useTransactionStore } from '@/src/store/useTransaction.store'
+import { useMonthlyBalance } from '@/src/hooks/useTransactionSelectors'
+import { useUIStore } from '@/src/store/useUI.store'
 import { formatCurrencySimple } from '@/src/utils/formatCurrency'
-import React from 'react'
 import { Text, View } from 'react-native'
 import { styles } from './balance-painel.style'
-
-interface BalancePainelProps {
-    selectedMonth: number
-}
 
 const monthNames = [
     '',
@@ -25,61 +20,42 @@ const monthNames = [
     'Dezembro',
 ]
 
-export function BalancePainel({ selectedMonth }: BalancePainelProps) {
-    const transactions = useTransactionStore((state) => state.transactions)
-    const generateRecurringTransactions = useTransactionStore(
-        (state) => state.generateRecurringTransactions,
+export function BalancePainel() {
+    const selectedMonth = useUIStore((s) => s.selectedMonth)
+    const selectedYear = useUIStore((s) => s.selectedYear)
+
+    const { totalIncome, expense, balance } = useMonthlyBalance(
+        selectedMonth,
+        selectedYear,
     )
 
-    React.useEffect(() => {
-        const currentYear = new Date().getFullYear()
-        generateRecurringTransactions(selectedMonth, currentYear)
-    }, [selectedMonth, generateRecurringTransactions])
-
-    const monthTransactions = transactions.filter((item) => {
-        const itemDate = new Date(item.date)
-        return itemDate.getMonth() + 1 === selectedMonth
-    })
-
-    const valorRecebido = monthTransactions
-        .filter((t) => t.type === TransactionType.INCOME)
-        .reduce((sum, t) => sum + t.amount, 0)
-
-    const valorUsado = monthTransactions
-        .filter((t) => t.type === TransactionType.EXPENSE)
-        .reduce((sum, t) => sum + t.amount, 0)
-
-    const disponivel = valorRecebido - valorUsado
-
-    const mesAno = `${monthNames[selectedMonth]}/${new Date().getFullYear()}`
+    const mesAno = `${monthNames[selectedMonth]}/${selectedYear}`
 
     return (
-        <>
-            <View style={styles.balancePainel}>
-                <Text style={styles.mesAno}>{mesAno}</Text>
+        <View style={styles.balancePainel}>
+            <Text style={styles.mesAno}>{mesAno}</Text>
 
-                <View style={styles.disponivelContainer}>
-                    <Text style={styles.titulo}>Disponível</Text>
-                    <Text style={styles.disponivel}>
-                        {formatCurrencySimple(disponivel)}
+            <View style={styles.disponivelContainer}>
+                <Text style={styles.titulo}>Disponível</Text>
+                <Text style={styles.disponivel}>
+                    {formatCurrencySimple(balance)}
+                </Text>
+            </View>
+
+            <View style={styles.row}>
+                <View style={styles.col}>
+                    <Text style={styles.label}>Receitas</Text>
+                    <Text style={[styles.valor, styles.valorReceita]}>
+                        {formatCurrencySimple(totalIncome)}
                     </Text>
                 </View>
-
-                <View style={styles.row}>
-                    <View style={styles.col}>
-                        <Text style={styles.label}>Receitas</Text>
-                        <Text style={[styles.valor, styles.valorReceita]}>
-                            {formatCurrencySimple(valorRecebido)}
-                        </Text>
-                    </View>
-                    <View style={styles.col}>
-                        <Text style={styles.label}>Despesas</Text>
-                        <Text style={[styles.valor, styles.valorDespesa]}>
-                            {formatCurrencySimple(valorUsado)}
-                        </Text>
-                    </View>
+                <View style={styles.col}>
+                    <Text style={styles.label}>Despesas</Text>
+                    <Text style={[styles.valor, styles.valorDespesa]}>
+                        {formatCurrencySimple(expense)}
+                    </Text>
                 </View>
             </View>
-        </>
+        </View>
     )
 }

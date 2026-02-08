@@ -1,12 +1,7 @@
-import { useEffect, useRef } from 'react';
-import {
-    Dimensions,
-    Pressable,
-    ScrollView,
-    Text,
-    View
-} from 'react-native';
-import { styles } from './nav-months.style';
+import { useUIStore } from '@/src/store/useUI.store'
+import { useEffect, useRef } from 'react'
+import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native'
+import { styles } from './nav-months.style'
 
 const months = [
     { id: 1, name: 'Janeiro', short: 'JAN' },
@@ -23,18 +18,16 @@ const months = [
     { id: 12, name: 'Dezembro', short: 'DEZ' },
 ]
 
-interface NavMonthsProps {
-    selectedMonth: number;
-    onMonthChange: (month: number) => void;
-}
+export function NavMonths() {
+    const selectedMonth = useUIStore((s) => s.selectedMonth)
+    const selectedYear = useUIStore((s) => s.selectedYear)
+    const setSelectedMonth = useUIStore((s) => s.setSelectedMonth)
 
-export function NavMonths({ selectedMonth, onMonthChange }: NavMonthsProps) {
     const scrollRef = useRef<ScrollView>(null)
-    const currentYear = new Date().getFullYear()
 
     useEffect(() => {
         if (scrollRef.current) {
-            const itemWidth = 88 
+            const itemWidth = 88
             const screenWidth = Dimensions.get('window').width
             const offset =
                 (selectedMonth - 1) * itemWidth -
@@ -46,11 +39,9 @@ export function NavMonths({ selectedMonth, onMonthChange }: NavMonthsProps) {
             })
         }
     }, [selectedMonth])
-    
+
     return (
         <View style={styles.container}>
-
-
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -66,7 +57,7 @@ export function NavMonths({ selectedMonth, onMonthChange }: NavMonthsProps) {
                                 styles.monthButton,
                                 isSelected && styles.monthButtonSelected,
                             ]}
-                            onPress={() => onMonthChange(month.id)}
+                            onPress={() => setSelectedMonth(month.id)}
                         >
                             <Text
                                 style={[
@@ -82,13 +73,12 @@ export function NavMonths({ selectedMonth, onMonthChange }: NavMonthsProps) {
                                     isSelected && styles.yearTextSelected,
                                 ]}
                             >
-                                {currentYear}
+                                {selectedYear}
                             </Text>
                         </Pressable>
                     )
                 })}
             </ScrollView>
-
         </View>
     )
 }

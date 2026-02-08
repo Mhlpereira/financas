@@ -1,11 +1,19 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSalaryStore } from "../../../store/useSalaryStore";
-import { colors } from "../../../themes";
-import { formatCurrency } from "../../../utils/formatCurrency";
-import { NewButton } from "../../ui/button";
-import { CustomModal } from "../../ui/modal";
-import { SalaryForm } from "../../ui/salary-form";
+import React, { useState } from 'react'
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from 'react-native'
+import { useAccountStore } from '../../../store/useAccount.store'
+import { useUIStore } from '../../../store/useUI.store'
+import { colors } from '../../../themes'
+import { formatCurrency } from '../../../utils/formatCurrency'
+import { NewButton } from '../../ui/button'
+import { CustomModal } from '../../ui/modal'
+import { SalaryForm } from '../../ui/salary-form'
 
 const styles = StyleSheet.create({
     container: {
@@ -26,7 +34,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 20,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         color: colors.text,
         marginBottom: 16,
     },
@@ -47,7 +55,7 @@ const styles = StyleSheet.create({
     },
     salaryValue: {
         fontSize: 24,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         color: colors.success,
         marginBottom: 8,
     },
@@ -56,7 +64,7 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
     },
     actionButtons: {
-        flexDirection: "row",
+        flexDirection: 'row',
         gap: 12,
     },
     editButton: {
@@ -66,91 +74,125 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     noSalaryContainer: {
-        alignItems: "center",
+        alignItems: 'center',
         padding: 20,
     },
     noSalaryText: {
         fontSize: 16,
         color: colors.textSecondary,
         marginBottom: 16,
-        textAlign: "center",
+        textAlign: 'center',
     },
     addButton: {
         minWidth: 160,
     },
-});
+})
 
 export const UserPage: React.FC = () => {
-    const { salary, updateSalary, deleteSalary, getSalary } = useSalaryStore();
-    const [showSalaryForm, setShowSalaryForm] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    const salary = useAccountStore((s) => s.account.salary)
+    const setSalary = useAccountStore((s) => s.setSalary)
+    const userName = useUIStore((s) => s.userName)
+    const setUserName = useUIStore((s) => s.setUserName)
 
-    const loadSalary = useCallback(async () => {
-        await getSalary();
-    }, [getSalary]);
-
-    useEffect(() => {
-        loadSalary();
-    }, [loadSalary]);
+    const [showSalaryForm, setShowSalaryForm] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
+    const [nameInput, setNameInput] = useState(userName)
 
     const handleAddSalary = () => {
-        setIsEditing(false);
-        setShowSalaryForm(true);
-    };
+        setIsEditing(false)
+        setShowSalaryForm(true)
+    }
 
     const handleEditSalary = () => {
-        setIsEditing(true);
-        setShowSalaryForm(true);
-    };
+        setIsEditing(true)
+        setShowSalaryForm(true)
+    }
 
     const handleDeleteSalary = () => {
         Alert.alert(
-            "Excluir Salário",
-            "Tem certeza que deseja excluir o salário cadastrado?",
+            'Excluir Salário',
+            'Tem certeza que deseja excluir o salário cadastrado?',
             [
+                { text: 'Cancelar', style: 'cancel' },
                 {
-                    text: "Cancelar",
-                    style: "cancel"
-                },
-                {
-                    text: "Excluir",
-                    style: "destructive",
+                    text: 'Excluir',
+                    style: 'destructive',
                     onPress: () => {
-                        deleteSalary();
-                        Alert.alert("Sucesso", "Salário excluído com sucesso.");
-                    }
-                }
-            ]
-        );
-    };
+                        setSalary(0)
+                        Alert.alert('Sucesso', 'Salário excluído com sucesso.')
+                    },
+                },
+            ],
+        )
+    }
 
     const handleSaveSalary = (amount: number) => {
-        updateSalary(amount);
-        setShowSalaryForm(false);
-        Alert.alert("Sucesso", isEditing ? "Salário atualizado com sucesso." : "Salário adicionado com sucesso.");
-    };
+        setSalary(amount)
+        setShowSalaryForm(false)
+        Alert.alert(
+            'Sucesso',
+            isEditing
+                ? 'Salário atualizado com sucesso.'
+                : 'Salário adicionado com sucesso.',
+        )
+    }
 
     const handleCancelForm = () => {
-        setShowSalaryForm(false);
-    };
+        setShowSalaryForm(false)
+    }
+
+    const handleSaveName = () => {
+        setUserName(nameInput.trim())
+        Alert.alert('Sucesso', 'Nome atualizado com sucesso.')
+    }
 
     return (
         <ScrollView style={styles.container}>
+            {/* Name Section */}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Nome</Text>
+                <View style={styles.salaryContainer}>
+                    <TextInput
+                        style={{
+                            borderWidth: 1,
+                            borderColor: colors.border,
+                            borderRadius: 12,
+                            padding: 16,
+                            fontSize: 18,
+                            color: colors.text,
+                            backgroundColor: colors.gray50,
+                            fontWeight: '600',
+                            marginBottom: 12,
+                        }}
+                        placeholder="Seu nome"
+                        placeholderTextColor={colors.textSecondary}
+                        value={nameInput}
+                        onChangeText={setNameInput}
+                    />
+                    <NewButton
+                        bText="Salvar Nome"
+                        onPress={handleSaveName}
+                        variant="primary"
+                        iconName="check"
+                    />
+                </View>
+            </View>
+
+            {/* Salary Section */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Salário</Text>
-                
-                {salary ? (
+
+                {salary > 0 ? (
                     <View style={styles.salaryContainer}>
                         <View style={styles.salaryInfo}>
-                            <Text style={styles.salaryLabel}>Salário Atual:</Text>
-                            <Text style={styles.salaryValue}>
-                                {formatCurrency(salary.amount)}
+                            <Text style={styles.salaryLabel}>
+                                Salário Atual:
                             </Text>
-                            <Text style={styles.salaryDate}>
-                                Atualizado em: {new Date(salary.updatedAt).toLocaleDateString('pt-BR')}
+                            <Text style={styles.salaryValue}>
+                                {formatCurrency(salary)}
                             </Text>
                         </View>
-                        
+
                         <View style={styles.actionButtons}>
                             <NewButton
                                 bText="Editar"
@@ -187,15 +229,15 @@ export const UserPage: React.FC = () => {
             <CustomModal
                 visible={showSalaryForm}
                 onClose={handleCancelForm}
-                title={isEditing ? "Editar Salário" : "Adicionar Salário"}
+                title={isEditing ? 'Editar Salário' : 'Adicionar Salário'}
             >
                 <SalaryForm
-                    initialAmount={isEditing && salary ? salary.amount : 0}
+                    initialAmount={isEditing ? salary : 0}
                     onSave={handleSaveSalary}
                     onCancel={handleCancelForm}
                     isEditing={isEditing}
                 />
             </CustomModal>
         </ScrollView>
-    );
-};
+    )
+}

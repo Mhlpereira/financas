@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { BalancePainel } from '../components/layout/balance-painel'
 import { ExpenseManager } from '../components/layout/expense-manager'
@@ -7,25 +7,18 @@ import { NavMonths } from '../components/layout/nav-months'
 import { UserPage } from '../components/pages/user-page'
 import { NewButton } from '../components/ui/button'
 import { CustomModal } from '../components/ui/modal'
-import { useNavigationStore } from '../store/useNavigationStore'
-import { useTransactionStore } from '../store/useTransaction.store'
+import { useUIStore } from '../store/useUI.store'
 import { homeStyles } from './home.styles'
 
 export default function Home() {
-    const [isModalVisible, setModalVisible] = useState(false)
-    const [selectedMonth, setSelectedMonth] = useState(
-        new Date().getMonth() + 1,
-    )
-    const loadData = useTransactionStore((state) => state.loadData)
-    const { currentPage } = useNavigationStore()
+    const currentPage = useUIStore((s) => s.currentPage)
+    const isAddModalOpen = useUIStore((s) => s.isAddModalOpen)
+    const openAddModal = useUIStore((s) => s.openAddModal)
+    const closeAddModal = useUIStore((s) => s.closeAddModal)
 
     const navAnimation = useRef(new Animated.Value(1)).current
     const balanceAnimation = useRef(new Animated.Value(0)).current
     const lastScrollY = useRef(0)
-
-    useEffect(() => {
-        loadData()
-    }, [loadData])
 
     const handleScroll = (scrollY: number) => {
         const currentScrollY = scrollY
@@ -86,10 +79,7 @@ export default function Home() {
                             },
                         ]}
                     >
-                        <NavMonths
-                            selectedMonth={selectedMonth}
-                            onMonthChange={setSelectedMonth}
-                        />
+                        <NavMonths />
                     </Animated.View>
 
                     <Animated.View
@@ -104,7 +94,7 @@ export default function Home() {
                             ],
                         }}
                     >
-                        <BalancePainel selectedMonth={selectedMonth} />
+                        <BalancePainel />
                     </Animated.View>
 
                     <Animated.View
@@ -123,24 +113,20 @@ export default function Home() {
                             },
                         ]}
                     >
-                        <ExpenseManager
-                            selectedMonth={selectedMonth}
-                            onScroll={handleScroll}
-                        />
+                        <ExpenseManager onScroll={handleScroll} />
                     </Animated.View>
 
                     <NewButton
                         iconName="plus"
                         variant="primary"
-                        onPress={() => setModalVisible(true)}
+                        onPress={openAddModal}
                         style={homeStyles.buttonPlus}
                         rounded
                     />
 
                     <CustomModal
-                        visible={isModalVisible}
-                        onClose={() => setModalVisible(false)}
-                        selectedMonth={selectedMonth}
+                        visible={isAddModalOpen}
+                        onClose={closeAddModal}
                     />
                 </>
             ) : (
