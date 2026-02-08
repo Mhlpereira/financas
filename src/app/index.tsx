@@ -8,28 +8,31 @@ import { UserPage } from '../components/pages/user-page'
 import { NewButton } from '../components/ui/button'
 import { CustomModal } from '../components/ui/modal'
 import { useNavigationStore } from '../store/useNavigationStore'
-import { useTransactionStore } from '../store/useTransactionStore'
+import { useTransactionStore } from '../store/useTransaction.store'
 import { homeStyles } from './home.styles'
 
 export default function Home() {
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-    const loadData = useTransactionStore(state => state.loadData);
-    const { currentPage } = useNavigationStore();
-    
-    const navAnimation = useRef(new Animated.Value(1)).current;
-    const balanceAnimation = useRef(new Animated.Value(0)).current;
-    const lastScrollY = useRef(0);
+    const [isModalVisible, setModalVisible] = useState(false)
+    const [selectedMonth, setSelectedMonth] = useState(
+        new Date().getMonth() + 1,
+    )
+    const loadData = useTransactionStore((state) => state.loadData)
+    const { currentPage } = useNavigationStore()
+
+    const navAnimation = useRef(new Animated.Value(1)).current
+    const balanceAnimation = useRef(new Animated.Value(0)).current
+    const lastScrollY = useRef(0)
 
     useEffect(() => {
-        loadData();
-    }, [loadData]);
+        loadData()
+    }, [loadData])
 
     const handleScroll = (scrollY: number) => {
-        const currentScrollY = scrollY;
-        const scrollDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
-        const threshold = 30;
-        
+        const currentScrollY = scrollY
+        const scrollDirection =
+            currentScrollY > lastScrollY.current ? 'down' : 'up'
+        const threshold = 30
+
         if (scrollDirection === 'down' && currentScrollY > threshold) {
             Animated.parallel([
                 Animated.timing(navAnimation, {
@@ -41,8 +44,8 @@ export default function Home() {
                     toValue: 1,
                     duration: 250,
                     useNativeDriver: true,
-                })
-            ]).start();
+                }),
+            ]).start()
         } else if (scrollDirection === 'up' || currentScrollY <= threshold) {
             Animated.parallel([
                 Animated.timing(navAnimation, {
@@ -54,66 +57,73 @@ export default function Home() {
                     toValue: 0,
                     duration: 250,
                     useNativeDriver: true,
-                })
-            ]).start();
+                }),
+            ]).start()
         }
-        
-        lastScrollY.current = currentScrollY;
-    };
+
+        lastScrollY.current = currentScrollY
+    }
 
     return (
         <View style={homeStyles.container}>
             <Header />
-            
+
             {currentPage === 'home' ? (
                 <>
-                    <Animated.View 
+                    <Animated.View
                         style={[
                             homeStyles.navContainer,
                             {
                                 opacity: navAnimation,
-                                transform: [{
-                                    translateY: navAnimation.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: [-60, 0],
-                                    })
-                                }]
-                            }
+                                transform: [
+                                    {
+                                        translateY: navAnimation.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [-60, 0],
+                                        }),
+                                    },
+                                ],
+                            },
                         ]}
                     >
-                        <NavMonths 
+                        <NavMonths
                             selectedMonth={selectedMonth}
                             onMonthChange={setSelectedMonth}
                         />
                     </Animated.View>
-                    
+
                     <Animated.View
                         style={{
-                            transform: [{
-                                translateY: balanceAnimation.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: [0, -50],
-                                })
-                            }]
+                            transform: [
+                                {
+                                    translateY: balanceAnimation.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, -50],
+                                    }),
+                                },
+                            ],
                         }}
                     >
                         <BalancePainel selectedMonth={selectedMonth} />
                     </Animated.View>
-                    
-                    <Animated.View 
+
+                    <Animated.View
                         style={[
                             homeStyles.expenseSection,
                             {
-                                transform: [{
-                                    translateY: balanceAnimation.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: [0, -50],
-                                    })
-                                }]
-                            }
+                                transform: [
+                                    {
+                                        translateY:
+                                            balanceAnimation.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [0, -50],
+                                            }),
+                                    },
+                                ],
+                            },
                         ]}
                     >
-                        <ExpenseManager 
+                        <ExpenseManager
                             selectedMonth={selectedMonth}
                             onScroll={handleScroll}
                         />
@@ -126,8 +136,8 @@ export default function Home() {
                         style={homeStyles.buttonPlus}
                         rounded
                     />
-                    
-                    <CustomModal 
+
+                    <CustomModal
                         visible={isModalVisible}
                         onClose={() => setModalVisible(false)}
                         selectedMonth={selectedMonth}

@@ -1,18 +1,16 @@
-import { TransactionType } from "../enums/transaction.enum";
-import { Installment } from "./installment.interface";
-
+import { Frequency, TransactionType } from '../enums/transaction.enum'
 
 export interface Transaction {
-
-    id: string;
-    type: TransactionType;
-    title: string;
-    amount: number;
-    date: Date;
-    isInstalment?: boolean;
-    installments?: Installment[];
-    recurringTransactionId?: string;
-    notes?: string;
-    createdAt: Date;
-    updatedAt: Date;
+    id: string
+    description: string
+    amount: number
+    type: TransactionType
+    frequency: Frequency
+    startDate: string
+    installments?: number
+    currentInstallment?: number
+    parentId?: string
+    notes?: string
+    createdAt: string
+    updatedAt: string
 }
