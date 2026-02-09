@@ -1,10 +1,10 @@
-import { colors } from '@/src/themes';
-import { StyleSheet } from 'react-native';
+import { colors } from '@/src/themes'
+import { StyleSheet } from 'react-native'
 
 export const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.surface,
-        paddingVertical: 16,
+        paddingVertical: 12,
         paddingHorizontal: 8,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
@@ -13,6 +13,26 @@ export const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
         shadowRadius: 4,
+    },
+    yearNav: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    yearArrow: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.gray100,
+    },
+    yearNavText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.text,
+        marginHorizontal: 16,
     },
     scrollContainer: {
         paddingHorizontal: 8,
@@ -71,4 +91,4 @@ export const styles = StyleSheet.create({
         opacity: 0.8,
         marginTop: 2,
     },
-});
+})

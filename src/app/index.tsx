@@ -1,9 +1,12 @@
 import { useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { BalancePainel } from '../components/layout/balance-painel'
+import { BottomNav } from '../components/layout/bottom-nav'
 import { ExpenseManager } from '../components/layout/expense-manager'
 import { Header } from '../components/layout/header'
 import { NavMonths } from '../components/layout/nav-months'
+import { CalendarPage } from '../components/pages/calendar-page'
+import { ExpensesPage } from '../components/pages/expenses-page'
 import { UserPage } from '../components/pages/user-page'
 import { NewButton } from '../components/ui/button'
 import { CustomModal } from '../components/ui/modal'
@@ -57,50 +60,39 @@ export default function Home() {
         lastScrollY.current = currentScrollY
     }
 
-    return (
-        <View style={homeStyles.container}>
-            <Header />
-
-            {currentPage === 'home' ? (
-                <>
-                    <Animated.View
-                        style={[
-                            homeStyles.navContainer,
-                            {
-                                opacity: navAnimation,
-                                transform: [
-                                    {
-                                        translateY: navAnimation.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [-60, 0],
-                                        }),
-                                    },
-                                ],
-                            },
-                        ]}
-                    >
-                        <NavMonths />
-                    </Animated.View>
-
-                    <Animated.View
-                        style={{
-                            transform: [
+    const renderPage = () => {
+        switch (currentPage) {
+            case 'calendar':
+                return <CalendarPage />
+            case 'expenses':
+                return <ExpensesPage />
+            case 'user':
+                return <UserPage />
+            default:
+                return (
+                    <>
+                        <Animated.View
+                            style={[
+                                homeStyles.navContainer,
                                 {
-                                    translateY: balanceAnimation.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: [0, -50],
-                                    }),
+                                    opacity: navAnimation,
+                                    transform: [
+                                        {
+                                            translateY:
+                                                navAnimation.interpolate({
+                                                    inputRange: [0, 1],
+                                                    outputRange: [-60, 0],
+                                                }),
+                                        },
+                                    ],
                                 },
-                            ],
-                        }}
-                    >
-                        <BalancePainel />
-                    </Animated.View>
+                            ]}
+                        >
+                            <NavMonths />
+                        </Animated.View>
 
-                    <Animated.View
-                        style={[
-                            homeStyles.expenseSection,
-                            {
+                        <Animated.View
+                            style={{
                                 transform: [
                                     {
                                         translateY:
@@ -110,28 +102,52 @@ export default function Home() {
                                             }),
                                     },
                                 ],
-                            },
-                        ]}
-                    >
-                        <ExpenseManager onScroll={handleScroll} />
-                    </Animated.View>
+                            }}
+                        >
+                            <BalancePainel />
+                        </Animated.View>
 
-                    <NewButton
-                        iconName="plus"
-                        variant="primary"
-                        onPress={openAddModal}
-                        style={homeStyles.buttonPlus}
-                        rounded
-                    />
+                        <Animated.View
+                            style={[
+                                homeStyles.expenseSection,
+                                {
+                                    transform: [
+                                        {
+                                            translateY:
+                                                balanceAnimation.interpolate({
+                                                    inputRange: [0, 1],
+                                                    outputRange: [0, -50],
+                                                }),
+                                        },
+                                    ],
+                                },
+                            ]}
+                        >
+                            <ExpenseManager onScroll={handleScroll} />
+                        </Animated.View>
 
-                    <CustomModal
-                        visible={isAddModalOpen}
-                        onClose={closeAddModal}
-                    />
-                </>
-            ) : (
-                <UserPage />
-            )}
+                        <NewButton
+                            iconName="plus"
+                            variant="primary"
+                            onPress={openAddModal}
+                            style={homeStyles.buttonPlus}
+                            rounded
+                        />
+
+                        <CustomModal
+                            visible={isAddModalOpen}
+                            onClose={closeAddModal}
+                        />
+                    </>
+                )
+        }
+    }
+
+    return (
+        <View style={homeStyles.container}>
+            <Header />
+            {renderPage()}
+            <BottomNav />
         </View>
     )
 }

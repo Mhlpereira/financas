@@ -1,6 +1,14 @@
 import { useUIStore } from '@/src/store/useUI.store'
 import { useEffect, useRef } from 'react'
-import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native'
+import {
+    Dimensions,
+    Pressable,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native'
+import Icon from 'react-native-vector-icons/AntDesign'
 import { styles } from './nav-months.style'
 
 const months = [
@@ -22,6 +30,7 @@ export function NavMonths() {
     const selectedMonth = useUIStore((s) => s.selectedMonth)
     const selectedYear = useUIStore((s) => s.selectedYear)
     const setSelectedMonth = useUIStore((s) => s.setSelectedMonth)
+    const setSelectedYear = useUIStore((s) => s.setSelectedYear)
 
     const scrollRef = useRef<ScrollView>(null)
 
@@ -42,6 +51,22 @@ export function NavMonths() {
 
     return (
         <View style={styles.container}>
+            <View style={styles.yearNav}>
+                <TouchableOpacity
+                    onPress={() => setSelectedYear(selectedYear - 1)}
+                    style={styles.yearArrow}
+                >
+                    <Icon name="left" size={16} color="#6b7280" />
+                </TouchableOpacity>
+                <Text style={styles.yearNavText}>{selectedYear}</Text>
+                <TouchableOpacity
+                    onPress={() => setSelectedYear(selectedYear + 1)}
+                    style={styles.yearArrow}
+                >
+                    <Icon name="right" size={16} color="#6b7280" />
+                </TouchableOpacity>
+            </View>
+
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -66,14 +91,6 @@ export function NavMonths() {
                                 ]}
                             >
                                 {month.short}
-                            </Text>
-                            <Text
-                                style={[
-                                    styles.yearText,
-                                    isSelected && styles.yearTextSelected,
-                                ]}
-                            >
-                                {selectedYear}
                             </Text>
                         </Pressable>
                     )

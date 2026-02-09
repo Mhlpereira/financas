@@ -97,7 +97,14 @@ export const useTransactionStore = create<TransactionState>()(
         }),
         {
             name: 'transaction-storage',
+            version: 2,
             storage: createJSONStorage(() => new MMKVStorageService()),
+            migrate: (persistedState: any, version: number) => {
+                if (version < 2) {
+                    return { transactions: [] }
+                }
+                return persistedState as any
+            },
         },
     ),
 )

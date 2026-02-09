@@ -6,7 +6,7 @@ import { styles } from './calendar-page.style'
 import { AddEntryModal } from './components/AddEntryModal'
 import { DayDetail } from './components/DayDetail'
 import { WorkStats } from './components/WorkStats'
-import { useCalendar } from './useCalendar'
+import { useCalendar } from '../../../hooks/useCalendar'
 
 LocaleConfig.locales['pt-br'] = {
     monthNames: [

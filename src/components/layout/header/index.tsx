@@ -24,6 +24,14 @@ export const Header = () => {
 
     const displayName = userName || 'Visitante'
 
+    const pageTitles: Record<string, string> = {
+        user: 'Gerenciar Usuário',
+        calendar: 'Calendário',
+        expenses: 'Extrato',
+    }
+
+    const isSubPage = currentPage !== 'home'
+
     const handleClearData = () => {
         Alert.alert(
             'Limpar Dados',
@@ -79,7 +87,7 @@ export const Header = () => {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                {currentPage === 'user' ? (
+                {isSubPage ? (
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => setCurrentPage('home')}
@@ -95,9 +103,11 @@ export const Header = () => {
                     </View>
                 )}
 
-                {currentPage === 'user' && (
+                {isSubPage && (
                     <View style={styles.centerTitle}>
-                        <Text style={styles.pageTitle}>Gerenciar Usuário</Text>
+                        <Text style={styles.pageTitle}>
+                            {pageTitles[currentPage] || ''}
+                        </Text>
                     </View>
                 )}
 

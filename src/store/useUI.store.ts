@@ -73,6 +73,7 @@ export const useUIStore = create<UIStore>()(
         }),
         {
             name: 'ui-storage',
+            version: 2,
             storage: createJSONStorage(() => new MMKVStorageService()),
             partialize: (state) => ({
                 userName: state.userName,

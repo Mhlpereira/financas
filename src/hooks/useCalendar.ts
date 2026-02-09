@@ -24,12 +24,12 @@ export function useCalendar() {
 
     const monthWorkDays = useMemo(
         () => getWorkDaysByMonth(selectedMonth, selectedYear),
-        [workDays, selectedMonth, selectedYear],
+        [getWorkDaysByMonth, selectedMonth, selectedYear],
     )
 
     const monthTotal = useMemo(
         () => getMonthlyTotal(selectedMonth, selectedYear),
-        [workDays, selectedMonth, selectedYear],
+        [getMonthlyTotal, selectedMonth, selectedYear],
     )
 
     const totalBusinessDays = useMemo(() => {
