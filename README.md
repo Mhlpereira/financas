@@ -1,42 +1,53 @@
-# App para gerenciar finanças
+# Finanças — Personal Finance App
 
-Aplicativo para facilitar a gestão financeira, trazendo tudo para o celular e eliminando a necessidade de planilhas.
+**An open-source mobile app for personal finance management — everything on your phone, no more spreadsheets.**
 
-## Finalidade
+A finance app built to make managing money simpler by bringing it all to mobile and removing the need for spreadsheets. It's an open-source project I develop for my own use, shipping features as I need them — and a way to go deeper into React Native to apply it in other projects.
 
-O aplicativo está sendo desenvolvido para uso pessoal, e as funcionalidades serão lançadas conforme minhas necessidades, com o objetivo de aprender mais sobre React Native para aplicar em um outro projeto.
+## Features
 
-## TechStack
+- Track income and expenses on mobile
+- Local-first storage (works without a backend)
+- Fast, lightweight, offline-friendly
 
-   - React native 
-   - Expo
-   - MMKV com db 
-   - Zustand
+## Tech Stack
 
+- **React Native** + **Expo**
+- **MMKV** — fast key-value storage used as the local database
+- **Zustand** — lightweight state management
+- **TypeScript**
 
-## .Env
-
-SECRET_KEY
+## Environment variables
 
 ```
+SECRET_KEY
+```
+
+Generate a secret:
+
+```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
-## Comando para executar
+## Running locally
 
-### Desenvolvimento Local
 ```bash
 npx expo start
 ```
 
-### Builds para teste
+## Test builds
+
 ```bash
 # Android APK
 npx eas build --platform android --profile standalone
 
-# iOS (requer conta Apple Developer)
+# iOS (requires an Apple Developer account)
 npx eas build --platform ios --profile standalone
 
-# Ambas as plataformas
+# Both platforms
 npx eas build --platform all --profile standalone
 ```
+
+---
+
+Built by [Mário Henrique Lino Pereira](https://github.com/Mhlpereira).
