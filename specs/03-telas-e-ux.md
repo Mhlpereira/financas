@@ -1,0 +1,241 @@
+# Spec 03 — Telas e UX
+
+## Navegação
+
+```
+┌─ Trava (PIN)                    ← antes de tudo, se configurado
+├─ Onboarding                     ← só na 1ª vez
+└─ App
+   ├─ Mês          (tab 1)  saldo do mês corrente + lançamentos
+   ├─ Futuro       (tab 2)  projeção 12 meses + acumulado
+   ├─ Compromissos (tab 3)  parcelas em aberto + gastos fixos
+   ├─ Ajustes      (tab 4)  perfis, categorias, segurança, backup
+   ├─ [modal] Novo / editar lançamento
+   ├─ [modal] Detalhe da ocorrência
+   └─ [modal] Seletor de perfil
+```
+
+O botão flutuante **+** fica sobre as tabs 1–3.
+
+## Sistema visual
+
+Tema escuro por padrão, com claro disponível. Escuro porque o app se olha de
+noite, na cama, revisando o mês — e porque números coloridos brilham mais sobre
+fundo escuro.
+
+```
+Fundo          #0B0F14   superfície elevada  #151B23
+Cartão         #1A222D   borda               #253040
+Texto          #E8EEF5   texto fraco         #8A9AAD
+Positivo       #34D399   receita, saldo bom
+Negativo       #F87171   despesa, saldo ruim
+Atenção        #FBBF24   vence em breve
+Marca          #6366F1   ação primária, seleção
+```
+
+- Raio de canto: 16 em cartões, 12 em campos, 999 em pílulas.
+- Espaçamento em múltiplos de 4; respiro padrão de 16 nas bordas da tela.
+- Números de dinheiro em **tabular nums**, para as colunas não dançarem.
+- Cor nunca é o único sinal: despesa tem `−` e ícone, receita tem `+`.
+
+## Tela: Mês
+
+```
+┌──────────────────────────────────────┐
+│  ● Pessoal ▾                    ⚙︎   │  ← seletor de perfil
+│                                      │
+│  ‹   setembro 2026   ›               │  ← swipe horizontal também navega
+│                                      │
+│  ┌────────────────────────────────┐  │
+│  │  Saldo do mês                  │  │
+│  │  + R$ 2.340,00                 │  │  ← grande, colorido
+│  │                                │  │
+│  │  Entradas      Saídas          │  │
+│  │  R$ 8.000,00   R$ 5.660,00     │  │
+│  │  ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░          │  │  ← barra: quanto do que entra já saiu
+│  └────────────────────────────────┘  │
+│                                      │
+│  Comprometido  R$ 3.180,00  (40%)    │  ← fixos + parcelas
+│  Livre         R$ 4.820,00           │
+│                                      │
+│  ── Lançamentos ──────── ▾ todos ──  │
+│                                      │
+│  hoje                                │
+│   🛒  Mercado              −179,90   │
+│   📺  Netflix        fixo   −55,00   │
+│  dia 15                              │
+│   🧊  Geladeira      3/10  −320,00   │
+│  dia 05                              │
+│   💰  Salário          ✓  +8.000,00  │
+└──────────────────────────────────────┘
+```
+
+**Comportamentos**
+
+- Lançamentos agrupados por dia, ordenados por `due_date`.
+- Pago tem `✓`, valor esmaecido e descrição riscada de leve.
+- Parcelado mostra `3/10`; recorrente mostra o selo `fixo`.
+- Toque abre o detalhe. **Deslizar para a direita** marca pago/não pago —
+  é o gesto mais usado do app e não pode custar dois toques.
+- Deslizar para a esquerda revela editar e excluir.
+- Filtro `▾` alterna entre todos / a pagar / pagos.
+- Mês futuro troca "Saldo do mês" por **"Saldo previsto"**, e o mês passado
+  mostra previsto e realizado lado a lado.
+- No escopo `ALL`, cada linha ganha um ponto com a cor do perfil.
+
+**Vazio**: ilustração discreta, "Nenhum lançamento em setembro" e um botão
+"Adicionar o primeiro".
+
+## Tela: Futuro
+
+```
+┌──────────────────────────────────────┐
+│  Futuro              12 meses ▾      │
+│                                      │
+│  Em 12 meses você junta              │
+│  R$ 28.400,00                        │
+│      ___________                     │
+│   __/           \___                 │  ← curva do acumulado, com a
+│  /          · · · · · ·              │    linha do zero pontilhada
+│                                      │
+│  set 26  +2.340   acum.  2.340   ›   │
+│  out 26  +2.340   acum.  4.680   ›   │
+│  nov 26  +2.660   acum.  7.340   ›   │  ← sobe: parcela acabou
+│  dez 26  +1.180   acum.  8.520   ›   │  ← cai: 13º? não, IPVA
+│  ...                                 │
+└──────────────────────────────────────┘
+```
+
+- Mês com saldo negativo vem em vermelho e com ícone de alerta — é o aviso
+  mais valioso da tela.
+- Tocar num mês navega para ele na aba Mês.
+- O gráfico é do **acumulado**, não do saldo mensal: a pergunta é "quanto eu
+  junto", e isso é uma curva, não barras soltas.
+
+## Tela: Compromissos
+
+Duas seções, porque respondem perguntas diferentes.
+
+```
+┌──────────────────────────────────────┐
+│  Compromissos                        │
+│                                      │
+│  ── Parcelas em aberto ───────────   │
+│  Total restante      R$ 4.480,00     │
+│                                      │
+│  🧊 Geladeira                        │
+│     3/10 · termina em jun 27         │
+│     ▓▓▓░░░░░░░   restam R$ 2.240,00  │
+│                                      │
+│  💻 Notebook                         │
+│     8/12 · termina em jan 27         │
+│     ▓▓▓▓▓▓▓▓░░   restam R$ 2.240,00  │
+│                                      │
+│  ── Gastos fixos ─────── R$ 890/mês ─│
+│  📺 Netflix              55,00  dia 8│
+│  🏠 Aluguel           1.800,00  dia 5│
+│  ...                                 │
+│                                      │
+│  ── Rendas ───────────  R$ 8.500/mês │
+│  💰 Salário           8.000,00  dia 5│
+│  💼 Consultoria         500,00  dia 20│
+└──────────────────────────────────────┘
+```
+
+"Termina em jun 27" é a informação que o Mario pediu: quando essa parcela sai
+do caminho. A barra de progresso mostra o quanto já foi.
+
+## Modal: Novo lançamento
+
+Um passo só, com o tipo escolhido no topo — não é um wizard.
+
+```
+┌──────────────────────────────────────┐
+│  ✕        Novo lançamento       Salvar│
+│                                      │
+│    ┌─────────┬─────────┐             │
+│    │ Despesa │ Receita │             │  ← segmentado
+│    └─────────┴─────────┘             │
+│                                      │
+│         − R$ 320,00                  │  ← teclado numérico próprio,
+│                                      │    dígitos entram da direita
+│  Descrição                           │
+│  [ Geladeira                       ] │
+│                                      │
+│  Categoria                           │
+│  [ 🏠 Casa                        ▾] │
+│                                      │
+│  ┌──────┬────────────┬────────────┐  │
+│  │ Única│ Parcelada  │ Recorrente │  │
+│  └──────┴────────────┴────────────┘  │
+│                                      │
+│  ── se Parcelada ──                  │
+│  Parcelas  [ 10 ]  1ª em [15/09/26]  │
+│  Total R$ 3.200,00 · termina jun/27  │  ← recalcula ao vivo
+│                                      │
+│  ── se Recorrente ──                 │
+│  Todo dia  [ 8 ]                     │
+│  De [set/26]  até [ sem fim ▾ ]      │
+│                                      │
+│  Perfil  ● Pessoal ▾                 │
+└──────────────────────────────────────┘
+```
+
+**Detalhes que importam**
+
+- O valor é o primeiro campo e já abre com foco. É o que a pessoa veio fazer.
+- Teclado numérico próprio: digitar `32000` vira `R$ 320,00`. Sem ponto, sem
+  vírgula, sem erro de digitação.
+- Em parcelado, o campo é o **valor da parcela**, com o total calculado abaixo.
+  Um toque em "total" inverte: você digita o total e ele divide.
+- "termina jun/27" aparece antes de salvar. Ver a consequência é metade do valor.
+- Categoria sugere a última usada para descrições parecidas.
+
+## Trava
+
+```
+┌──────────────────────────────────────┐
+│                                      │
+│              🔒                      │
+│         Digite seu PIN               │
+│                                      │
+│        ● ● ● ○ ○ ○                   │
+│                                      │
+│         1    2    3                  │
+│         4    5    6                  │
+│         7    8    9                  │
+│         ☝︎    0    ⌫                  │
+│                                      │
+│      Usar biometria                  │
+└──────────────────────────────────────┘
+```
+
+- Biometria dispara sozinha ao abrir, se habilitada.
+- PIN errado: os pontos tremem (haptic de erro) e limpam.
+- Em bloqueio progressivo: "Tente novamente em 4:32", com contagem regressiva.
+
+## Onboarding
+
+Três telas, puláveis:
+
+1. **Perfis** — "Separe o que é seu do que é da empresa." Já vem com Pessoal e
+   Empresa criados; dá para renomear ali mesmo.
+2. **Renda** — "Quanto entra por mês?" Cadastra o salário direto, com dia.
+3. **Proteção** — "Quer trancar o app?" PIN opcional, pulável.
+
+Ao terminar, cai na aba Mês já com o salário lançado. O app nunca abre vazio.
+
+## Acessibilidade
+
+- Área de toque mínima de 44×44.
+- Todo ícone tem `accessibilityLabel`.
+- Valores lidos por extenso: "menos trezentos e vinte reais", não "−320,00".
+- Contraste mínimo 4.5:1 em texto — a paleta acima já cumpre.
+- Respeita `prefers-reduced-motion` desligando as transições de número.
+
+## Microinterações
+
+- Saldo anima contando até o valor ao trocar de mês (200ms, reduzido se pedido).
+- Marcar como pago: haptic leve + a linha esmaece.
+- Puxar para baixo na aba Mês: reestende o horizonte e recarrega.
+- Trocar de mês por swipe, com a transição acompanhando o dedo.

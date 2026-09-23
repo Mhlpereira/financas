@@ -1,0 +1,95 @@
+# Spec 05 — Critérios de Aceite
+
+Cada item é verificável no app rodando. A v1 está pronta quando todos passam.
+
+## Perfis
+
+- [ ] **P1** Instalação nova traz os perfis "Pessoal" e "Empresa".
+- [ ] **P2** Criar um perfil pede nome, cor e ícone; ele aparece no seletor.
+- [ ] **P3** Trocar de perfil recarrega os números do mês sem sair da tela.
+- [ ] **P4** O escopo "Todos" soma os perfis e marca cada linha com a cor do dono.
+- [ ] **P5** Excluir um perfil apaga os lançamentos dele e pede confirmação nominal.
+- [ ] **P6** Excluir o último perfil é recusado com mensagem clara.
+- [ ] **P7** Com "Todos" ativo, o botão + pede o perfil antes de abrir o formulário.
+
+## Renda
+
+- [ ] **R1** Cadastrar salário recorrente de R$ 8.000 no dia 5 faz ele aparecer em
+      todos os meses futuros, com vencimento no dia 5.
+- [ ] **R2** Uma segunda fonte de renda soma no total de entradas do mês.
+- [ ] **R3** Renda com data final para de aparecer depois dela.
+- [ ] **R4** Aumentar o salário de 8.000 para 9.000 muda os meses futuros e
+      **não** muda os meses já pagos.
+
+## Lançamentos
+
+- [ ] **L1** Compra única aparece só no mês da data.
+- [ ] **L2** Compra em 10x a partir de 15/09/2026 gera 10 ocorrências, de 09/2026
+      a 06/2027, cada uma com o valor da parcela.
+- [ ] **L3** A 3ª parcela mostra "3/10".
+- [ ] **L4** Depois da última parcela, o compromisso some da projeção.
+- [ ] **L5** Gasto recorrente sem data final aparece até o horizonte (36 meses).
+- [ ] **L6** Recorrente no dia 31 cai em 28/02 (e 29/02 em ano bissexto), nunca em 01/03.
+- [ ] **L7** Editar o valor de uma única ocorrência não altera as outras.
+- [ ] **L8** Excluir um parcelado remove todas as parcelas, com confirmação.
+- [ ] **L9** Arquivar um recorrente tira os meses futuros e mantém os passados.
+- [ ] **L10** Digitar `32000` no teclado do valor mostra `R$ 320,00`.
+- [ ] **L11** Em parcelado, alternar entre "valor da parcela" e "valor total"
+      recalcula o outro corretamente.
+
+## Mês
+
+- [ ] **M1** A aba Mês abre no mês corrente.
+- [ ] **M2** Saldo = entradas − saídas, com sinal e cor certos.
+- [ ] **M3** "Comprometido" conta só parcelas e recorrentes.
+- [ ] **M4** Deslizar a linha para a direita marca como pago, com haptic.
+- [ ] **M5** Pago reflete em "realizado" sem mexer no "previsto".
+- [ ] **M6** Marcar um mês como pulado tira ele das duas somas.
+- [ ] **M7** Navegar para trás e para frente por seta e por swipe.
+- [ ] **M8** Mês futuro rotula "Saldo previsto"; mês passado mostra previsto e realizado.
+- [ ] **M9** Mês sem lançamento mostra estado vazio com atalho para adicionar.
+
+## Futuro
+
+- [ ] **F1** Lista 12 meses à frente com saldo previsto de cada um.
+- [ ] **F2** O acumulado é a soma corrente a partir do mês atual.
+- [ ] **F3** O mês em que um parcelamento acaba mostra saldo maior que o anterior.
+- [ ] **F4** Mês com saldo negativo vem destacado em vermelho.
+- [ ] **F5** Tocar num mês leva para ele na aba Mês.
+- [ ] **F6** O gráfico acompanha a lista.
+
+## Compromissos
+
+- [ ] **C1** Lista os parcelamentos em aberto com progresso e mês de término.
+- [ ] **C2** "Total restante" soma só as parcelas ainda não pagas.
+- [ ] **C3** Lista os gastos fixos com o total mensal no cabeçalho.
+- [ ] **C4** Lista as rendas recorrentes com o total mensal.
+- [ ] **C5** Parcelamento quitado sai da lista.
+
+## Trava
+
+- [ ] **T1** Definir PIN pede confirmação e rejeita se as duas digitações diferirem.
+- [ ] **T2** Com PIN ativo, abrir o app exige desbloqueio.
+- [ ] **T3** Biometria dispara sozinha quando habilitada, com o PIN como alternativa.
+- [ ] **T4** PIN errado treme, limpa e conta a tentativa.
+- [ ] **T5** Na 5ª tentativa errada, entra em espera com contagem regressiva.
+- [ ] **T6** Voltar do background em menos de 60s não pede desbloqueio.
+- [ ] **T7** Voltar depois de 60s pede.
+- [ ] **T8** Remover o PIN pede o PIN atual.
+- [ ] **T9** O PIN sobrevive a fechar e reabrir o app.
+
+## Dados
+
+- [ ] **D1** Os dados sobrevivem a fechar e reabrir o app.
+- [ ] **D2** Exportar gera JSON com tudo e abre o share sheet.
+- [ ] **D3** Importar restaura o estado do backup, com confirmação antes.
+- [ ] **D4** Importar backup de versão desconhecida é recusado com mensagem.
+- [ ] **D5** Nenhum valor monetário sofre erro de arredondamento (tudo em centavos).
+
+## Qualidade
+
+- [ ] **Q1** `npx tsc --noEmit` passa sem erro.
+- [ ] **Q2** `npm test` passa, cobrindo materialização, `clampDay` e saldos.
+- [ ] **Q3** Roda no Expo Go, Android e iOS, sem build nativo.
+- [ ] **Q4** A aba Mês responde em menos de 100ms com 500 ocorrências no mês.
+- [ ] **Q5** Nenhum aviso de chave duplicada ou update fora de ciclo no console.

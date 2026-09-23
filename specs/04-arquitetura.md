@@ -1,0 +1,110 @@
+# Spec 04 — Arquitetura
+
+## Stack
+
+| Peça | Escolha | Porquê |
+| --- | --- | --- |
+| Runtime | Expo SDK 57 | Roda no Expo Go, sem build nativo |
+| Navegação | `expo-router` | Rotas por arquivo, tabs e modais prontos |
+| Banco | `expo-sqlite` (API async) | Relacional, consulta por mês, funciona no Expo Go |
+| Estado | `zustand` | Store pequena, sem boilerplate de Context |
+| Segredo | `expo-secure-store` | Keychain / Keystore para hash do PIN |
+| Biometria | `expo-local-authentication` | Face ID / digital |
+| Hash | `expo-crypto` | SHA-256 nativo |
+| Datas | `src/utils/date.ts`, próprio | Ver nota abaixo |
+| Gráfico | `react-native-svg` | Curva própria; lib de chart seria peso morto |
+| Ícones | `@expo/vector-icons` (Ionicons) | Já vem no Expo |
+| Haptics | `expo-haptics` | Confirmação de "pago" |
+| Gestos | `react-native-gesture-handler` + `reanimated` | Swipe na linha do lançamento |
+| Data picker | `@react-native-community/datetimepicker` | Picker nativo, roda no Expo Go |
+| Backup | `expo-file-system` + `expo-sharing` + `expo-document-picker` | Exportar e importar JSON |
+
+**Por que datas próprias em vez de `date-fns`:** o app não opera sobre `Date`.
+Ele opera sobre duas strings — `Competence` (`'YYYY-MM'`) e `ISODate`
+(`'YYYY-MM-DD'`) — e as operações que importam (andar N meses, encaixar o dia 31
+em fevereiro, comparar competências) são aritmética de inteiros sobre elas.
+Passar por `Date` só reintroduziria timezone e horário, que são exatamente as
+duas coisas que criam bug aqui. São ~40 linhas, cobertas por teste.
+
+Nenhuma dependência fora do que o Expo Go carrega. Um `npx expo start` e o QR
+code bastam.
+
+## Camadas
+
+```
+app/            rotas (expo-router) — só composição e layout
+  (tabs)/       mês, futuro, compromissos, ajustes
+  lock.tsx      onboarding.tsx      entry/[id].tsx
+
+src/
+  db/           schema.sql, client, migrations, seed
+  repositories/ SQL bruto, uma função por consulta — a única camada que fala SQL
+  domain/       regras puras: materialize, clampDay, cálculos do mês, projeção
+  stores/       zustand: sessão (trava), perfil ativo, mês selecionado
+  hooks/        useMonth, useProjection, useCommitments — liga repo + store
+  ui/           componentes sem regra de negócio: Card, Money, MonthPicker…
+  theme/        cores, espaçamento, tipografia
+  utils/        money, date, id
+```
+
+A regra que sustenta o resto: **`domain/` não importa nada do React nem do
+SQLite.** É função pura de entrada e saída. É o que torna a materialização e os
+cálculos de saldo testáveis sem subir um app ou um banco — e essas são
+exatamente as partes onde um erro passa despercebido e envenena todos os
+números da tela.
+
+`repositories/` é a única camada que escreve SQL. Nenhum componente monta query.
+
+## Fluxo de dados
+
+```
+tela → hook → repository → SQLite
+                  ↑
+              domain (puro)
+```
+
+Escrita invalida um contador de versão na store; os hooks observam e refazem a
+consulta. Sem cache sofisticado: o banco é local e as consultas são de
+milissegundos. Um `react-query` aqui resolveria um problema que não existe.
+
+## Migrações
+
+`settings.schema_version` guarda a versão. No boot, `migrate()` aplica em ordem
+as migrações acima da versão atual, cada uma numa transação. A v1 cria o schema
+e as sementes.
+
+Mesmo sendo app pessoal, isso existe desde o começo: sem migração, a primeira
+mudança de schema em um app com dados reais dentro vira perda de dados.
+
+## Boot
+
+```
+1. abre o banco, roda migrate()
+2. lê settings
+3. PIN configurado? → tela de trava → biometria / PIN
+4. onboarding pendente? → onboarding
+5. estende o horizonte das recorrências
+6. entra na aba Mês, no mês corrente
+```
+
+O passo 5 é o que mantém a projeção viva sem tarefa em segundo plano — o app
+só precisa estar em dia quando você olha para ele.
+
+## Testes
+
+`jest` + `@testing-library/react-native`, com foco em `domain/`:
+
+- `materialize` nos três tipos, incluindo virada de ano;
+- `clampDay` em fevereiro, ano bissexto, meses de 30 e 31;
+- rematerialização preservando `paid` e `is_overridden`;
+- saldos do mês com `skipped` no meio;
+- acumulado da projeção com mês negativo.
+
+A UI ganha smoke tests; o que precisa de rede de segurança é a aritmética.
+
+## Convenções
+
+- TypeScript `strict`, sem `any` — dinheiro tipado como `Cents = number`.
+- Nomes de domínio em inglês no código (`commitment`, `occurrence`), textos de
+  interface em pt-BR, centralizados em `src/i18n/pt-BR.ts`.
+- Nada de `console.log` em código entregue.
