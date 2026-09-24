@@ -1,18 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, typography } from '@/theme';
 
+const BAR_HEIGHT = 62;
+
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.brandText,
         tabBarInactiveTintColor: colors.textFaint,
-        tabBarStyle: styles.bar,
+        tabBarStyle: [
+          styles.bar,
+          { height: BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom },
+        ],
         tabBarLabelStyle: typography.micro,
+        tabBarItemStyle: styles.item,
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
@@ -53,7 +62,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopColor: colors.border,
     borderTopWidth: StyleSheet.hairlineWidth,
-    height: 64,
     paddingTop: 6,
+    elevation: 0,
+  },
+  item: {
+    paddingTop: 2,
   },
 });

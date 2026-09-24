@@ -8,13 +8,17 @@ import {
   createProfile,
   deleteProfile,
   nameExists,
+  setInvestmentGoal,
   updateProfile,
 } from '@/repositories/profiles';
 import { useAppStore } from '@/stores/app';
 import { colors, palette, radius, spacing } from '@/theme';
+import { appendDigit, removeDigit } from '@/utils/money';
 import { Button } from '@/ui/Button';
 import { Card } from '@/ui/Card';
 import { Field, Input } from '@/ui/Field';
+import { Money } from '@/ui/Money';
+import { Keypad } from '@/ui/Keypad';
 import { Screen } from '@/ui/Screen';
 import { Sheet } from '@/ui/Sheet';
 import { Text } from '@/ui/Text';
@@ -44,6 +48,7 @@ export default function ProfilesScreen() {
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(palette[0]);
   const [icon, setIcon] = useState<keyof typeof Ionicons.glyphMap>('person');
+  const [goal, setGoal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -52,6 +57,7 @@ export default function ProfilesScreen() {
     setName('');
     setColor(palette[profiles.length % palette.length]);
     setIcon('person');
+    setGoal(0);
     setError(null);
     setCreating(true);
   };
@@ -61,6 +67,7 @@ export default function ProfilesScreen() {
     setName(profile.name);
     setColor(profile.color);
     setIcon(profile.icon as keyof typeof Ionicons.glyphMap);
+    setGoal(profile.investmentGoal);
     setError(null);
     setCreating(true);
   };
@@ -85,8 +92,13 @@ export default function ProfilesScreen() {
 
     setSaving(true);
 
-    if (editing) await updateProfile(editing.id, { name: trimmed, color, icon });
-    else await createProfile({ name: trimmed, color, icon });
+    if (editing) {
+      await updateProfile(editing.id, { name: trimmed, color, icon });
+      await setInvestmentGoal(editing.id, goal);
+    } else {
+      const created = await createProfile({ name: trimmed, color, icon });
+      if (goal > 0) await setInvestmentGoal(created.id, goal);
+    }
 
     await refreshProfiles();
     bumpRevision();
@@ -149,9 +161,22 @@ export default function ProfilesScreen() {
                 />
               </View>
 
-              <Text variant="body" style={styles.rowLabel}>
-                {profile.name}
-              </Text>
+              <View style={styles.rowLabel}>
+                <Text variant="body">{profile.name}</Text>
+                {profile.investmentGoal > 0 ? (
+                  <View style={styles.goalTag}>
+                    <Ionicons name="trending-up" size={10} color={colors.brandText} />
+                    <Money
+                      value={profile.investmentGoal}
+                      variant="micro"
+                      color={colors.brandText}
+                    />
+                    <Text variant="micro" tone="faint">
+                      /mês
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
 
               <Pressable
                 accessibilityRole="button"
@@ -236,6 +261,20 @@ export default function ProfilesScreen() {
             </View>
           </Field>
 
+          <Field
+            label="Meta de investimento por mês"
+            hint="Quanto você quer separar todo mês neste perfil. Deixe zero para não acompanhar."
+          >
+            <View style={styles.goalBox}>
+              <Money value={goal} variant="title" color={goal > 0 ? colors.brandText : colors.textFaint} />
+            </View>
+            <Keypad
+              compact
+              onDigit={(digit) => setGoal((current) => appendDigit(current, digit))}
+              onBackspace={() => setGoal(removeDigit)}
+            />
+          </Field>
+
           <Button
             label={editing ? 'Salvar' : 'Criar perfil'}
             onPress={save}
@@ -288,6 +327,16 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     flex: 1,
+    gap: 3,
+  },
+  goalTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  goalBox: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
   },
   rowAction: {
     width: 44,

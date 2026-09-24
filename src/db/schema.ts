@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const CREATE_SCHEMA = `
 PRAGMA foreign_keys = ON;
@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   color       TEXT NOT NULL,
   icon        TEXT NOT NULL,
   sort_order  INTEGER NOT NULL DEFAULT 0,
-  created_at  TEXT NOT NULL
+  created_at  TEXT NOT NULL,
+  investment_goal INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS categories (
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS commitments (
   end_date      TEXT,
   day_of_month  INTEGER,
   notes         TEXT,
+  is_investment INTEGER NOT NULL DEFAULT 0,
   archived      INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL,
   updated_at    TEXT NOT NULL
@@ -53,6 +55,7 @@ CREATE TABLE IF NOT EXISTS occurrences (
                     CHECK (status IN ('pending', 'paid', 'skipped')),
   paid_at           TEXT,
   is_overridden     INTEGER NOT NULL DEFAULT 0,
+  is_investment     INTEGER NOT NULL DEFAULT 0,
   UNIQUE (commitment_id, competence)
 );
 
@@ -65,4 +68,10 @@ CREATE INDEX IF NOT EXISTS idx_occ_competence   ON occurrences (competence);
 CREATE INDEX IF NOT EXISTS idx_occ_profile_comp ON occurrences (profile_id, competence);
 CREATE INDEX IF NOT EXISTS idx_occ_commitment   ON occurrences (commitment_id);
 CREATE INDEX IF NOT EXISTS idx_com_profile      ON commitments (profile_id, archived);
+`;
+
+export const MIGRATE_TO_V2 = `
+ALTER TABLE profiles    ADD COLUMN investment_goal INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE commitments ADD COLUMN is_investment   INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE occurrences ADD COLUMN is_investment   INTEGER NOT NULL DEFAULT 0;
 `;

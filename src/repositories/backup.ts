@@ -96,8 +96,8 @@ export async function importBackup(backup: BackupFile): Promise<void> {
 
       for (const profile of backup.profiles) {
         await db.runAsync(
-          `INSERT INTO profiles (id, name, color, icon, sort_order, created_at)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO profiles (id, name, color, icon, sort_order, created_at, investment_goal)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [
             profile.id,
             profile.name,
@@ -105,6 +105,7 @@ export async function importBackup(backup: BackupFile): Promise<void> {
             profile.icon,
             profile.sort_order,
             profile.created_at,
+            profile.investment_goal ?? 0,
           ],
         );
       }
@@ -129,8 +130,8 @@ export async function importBackup(backup: BackupFile): Promise<void> {
         await db.runAsync(
           `INSERT INTO commitments
              (id, profile_id, category_id, kind, type, description, amount, installments,
-              start_date, end_date, day_of_month, notes, archived, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              start_date, end_date, day_of_month, notes, is_investment, archived, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             commitment.id,
             commitment.profile_id,
@@ -144,6 +145,7 @@ export async function importBackup(backup: BackupFile): Promise<void> {
             commitment.end_date,
             commitment.day_of_month,
             commitment.notes,
+            commitment.is_investment ?? 0,
             commitment.archived,
             commitment.created_at,
             commitment.updated_at,
@@ -155,8 +157,8 @@ export async function importBackup(backup: BackupFile): Promise<void> {
         await db.runAsync(
           `INSERT INTO occurrences
              (id, commitment_id, profile_id, kind, competence, due_date, amount,
-              installment_index, status, paid_at, is_overridden)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              installment_index, status, paid_at, is_overridden, is_investment)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             occurrence.id,
             occurrence.commitment_id,
@@ -169,6 +171,7 @@ export async function importBackup(backup: BackupFile): Promise<void> {
             occurrence.status,
             occurrence.paid_at,
             occurrence.is_overridden,
+            occurrence.is_investment ?? 0,
           ],
         );
       }

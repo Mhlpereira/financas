@@ -1,4 +1,12 @@
-import { buildProjection, groupByDueDate, savingsRate, spentRatio, summarizeMonth } from '../calc';
+import {
+  buildProjection,
+  canAffordGoal,
+  groupByDueDate,
+  investmentProgress,
+  savingsRate,
+  spentRatio,
+  summarizeMonth,
+} from '../calc';
 import type { OccurrenceView } from '../types';
 
 function view(overrides: Partial<OccurrenceView> = {}): OccurrenceView {
@@ -14,6 +22,7 @@ function view(overrides: Partial<OccurrenceView> = {}): OccurrenceView {
     status: 'pending',
     paidAt: null,
     isOverridden: false,
+    isInvestment: false,
     description: 'Teste',
     commitmentType: 'single',
     installmentsTotal: null,
@@ -153,5 +162,72 @@ describe('groupByDueDate', () => {
 
     expect(groups.map((group) => group.dueDate)).toEqual(['2026-09-05', '2026-09-15']);
     expect(groups[1].items).toHaveLength(2);
+  });
+});
+
+describe('investimento', () => {
+  const mes = (goal: number) =>
+    summarizeMonth(
+      '2026-09',
+      [
+        view({ kind: 'income', amount: 900_000 }),
+        view({ kind: 'expense', amount: 400_000 }),
+        view({ kind: 'expense', amount: 150_000, isInvestment: true, status: 'paid' }),
+        view({ kind: 'expense', amount: 50_000, isInvestment: true }),
+      ],
+      goal,
+    );
+
+  it('não conta investimento como gasto', () => {
+    expect(mes(0).expensePlanned).toBe(400_000);
+  });
+
+  it('separa investido previsto de realizado', () => {
+    const summary = mes(0);
+    expect(summary.investmentPlanned).toBe(200_000);
+    expect(summary.investmentActual).toBe(150_000);
+  });
+
+  it('a sobra do mês ignora o investimento', () => {
+    expect(mes(0).balancePlanned).toBe(500_000);
+  });
+
+  it('calcula o quanto falta para a meta', () => {
+    const summary = mes(200_000);
+    expect(summary.investmentGoal).toBe(200_000);
+    expect(summary.investmentGap).toBe(50_000);
+  });
+
+  it('marca meta batida com gap zero ou negativo', () => {
+    expect(mes(150_000).investmentGap).toBe(0);
+    expect(mes(100_000).investmentGap).toBe(-50_000);
+  });
+
+  it('desconta o investido da sobra', () => {
+    expect(mes(200_000).leftAfterInvesting).toBe(350_000);
+  });
+
+  it('calcula o progresso da meta, limitado a 1', () => {
+    expect(investmentProgress(mes(300_000))).toBeCloseTo(0.5);
+    expect(investmentProgress(mes(100_000))).toBe(1);
+  });
+
+  it('não calcula progresso sem meta', () => {
+    expect(investmentProgress(mes(0))).toBeNull();
+  });
+
+  it('diz se a sobra do mês cobre a meta', () => {
+    expect(canAffordGoal(mes(300_000))).toBe(true);
+    expect(canAffordGoal(mes(800_000))).toBe(false);
+  });
+
+  it('investimento pulado sai da conta', () => {
+    const summary = summarizeMonth(
+      '2026-09',
+      [view({ kind: 'expense', amount: 90_000, isInvestment: true, status: 'skipped' })],
+      50_000,
+    );
+    expect(summary.investmentPlanned).toBe(0);
+    expect(summary.investmentActual).toBe(0);
   });
 });

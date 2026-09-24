@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import type { CommitmentInput, CommitmentType, Kind } from '@/domain/types';
 import { ALL_PROFILES } from '@/domain/types';
@@ -16,9 +16,11 @@ import {
   addMonths,
   competenceOf,
   dueDateIn,
+  formatMonthLong,
   formatMonthSlash,
   parseISODate,
   todayISO,
+  type Competence,
   type ISODate,
 } from '@/utils/date';
 import {
@@ -42,6 +44,12 @@ const MAX_INSTALLMENTS = 120;
 
 type AmountMode = 'installment' | 'total';
 
+function defaultStartDate(competence: Competence): ISODate {
+  const today = todayISO();
+  if (competenceOf(today) === competence) return today;
+  return dueDateIn(competence, parseISODate(today).day);
+}
+
 export default function EntryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string }>();
@@ -50,6 +58,7 @@ export default function EntryScreen() {
   const profiles = useAppStore((state) => state.profiles);
   const categories = useAppStore((state) => state.categories);
   const scope = useAppStore((state) => state.scope);
+  const competence = useAppStore((state) => state.competence);
   const bumpRevision = useAppStore((state) => state.bumpRevision);
 
   const [kind, setKind] = useState<Kind>('expense');
@@ -62,11 +71,12 @@ export default function EntryScreen() {
     scope === ALL_PROFILES ? (profiles[0]?.id ?? '') : scope,
   );
   const [installments, setInstallments] = useState('2');
-  const [startDate, setStartDate] = useState<ISODate>(todayISO());
+  const [startDate, setStartDate] = useState<ISODate>(() => defaultStartDate(competence));
   const [dayOfMonth, setDayOfMonth] = useState('5');
   const [hasEndDate, setHasEndDate] = useState(false);
-  const [endDate, setEndDate] = useState<ISODate>(dueDateIn(addMonths(competenceOf(todayISO()), 11), 1));
+  const [endDate, setEndDate] = useState<ISODate>(() => dueDateIn(addMonths(competence, 11), 1));
   const [notes, setNotes] = useState('');
+  const [isInvestment, setIsInvestment] = useState(false);
 
   const [categorySheet, setCategorySheet] = useState(false);
   const [profileSheet, setProfileSheet] = useState(false);
@@ -95,9 +105,14 @@ export default function EntryScreen() {
       setHasEndDate(commitment.endDate !== null);
       if (commitment.endDate) setEndDate(commitment.endDate);
       setNotes(commitment.notes ?? '');
+      setIsInvestment(commitment.isInvestment);
       setLoaded(true);
     });
   }, [editingId]);
+
+  useEffect(() => {
+    if (kind === 'income' && isInvestment) setIsInvestment(false);
+  }, [kind, isInvestment]);
 
   const availableCategories = useMemo(
     () => categories.filter((category) => category.kind === kind),
@@ -163,6 +178,7 @@ export default function EntryScreen() {
       endDate: type === 'recurring' && hasEndDate ? endDate : null,
       dayOfMonth: type === 'recurring' ? day : null,
       notes: notes.trim() || null,
+      isInvestment,
     };
 
     try {
@@ -280,6 +296,23 @@ export default function EntryScreen() {
           />
         </Field>
 
+        {kind === 'expense' ? (
+          <View style={styles.investmentRow}>
+            <View style={styles.investmentText}>
+              <Text variant="body">É investimento</Text>
+              <Text variant="caption" tone="faint">
+                Sai da conta, mas não conta como gasto — entra na sua meta
+              </Text>
+            </View>
+            <Switch
+              value={isInvestment}
+              onValueChange={setIsInvestment}
+              trackColor={{ false: colors.border, true: colors.positive }}
+              thumbColor={colors.text}
+            />
+          </View>
+        ) : null}
+
         <Field label="Como se repete">
           <Segmented
             value={type}
@@ -293,7 +326,7 @@ export default function EntryScreen() {
         </Field>
 
         {type === 'single' ? (
-          <Field label="Data">
+          <Field label="Data" hint={`Cai em ${formatMonthLong(competenceOf(startDate))}`}>
             <DateField value={startDate} onChange={setStartDate} label="Data da compra" />
           </Field>
         ) : null}
@@ -330,7 +363,8 @@ export default function EntryScreen() {
                 <Money value={totalAmount} variant="caption" color={colors.textMuted} />
                 <Text variant="caption" tone="muted">
                   {' '}
-                  · termina {formatMonthSlash(lastCompetence)}
+                  · de {formatMonthSlash(competenceOf(startDate))} a{' '}
+                  {formatMonthSlash(lastCompetence)}
                 </Text>
               </View>
             </View>
@@ -499,5 +533,18 @@ const styles = StyleSheet.create({
   previewLine: {
     flexDirection: 'row',
     alignItems: 'baseline',
+  },
+  investmentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  investmentText: {
+    flex: 1,
+    gap: 2,
   },
 });

@@ -7,6 +7,7 @@ export interface ProfileRow {
   icon: string;
   sort_order: number;
   created_at: string;
+  investment_goal: number;
 }
 
 export interface CategoryRow {
@@ -32,6 +33,7 @@ export interface CommitmentRow {
   end_date: string | null;
   day_of_month: number | null;
   notes: string | null;
+  is_investment: number;
   archived: number;
   created_at: string;
   updated_at: string;
@@ -49,6 +51,7 @@ export interface OccurrenceRow {
   status: 'pending' | 'paid' | 'skipped';
   paid_at: string | null;
   is_overridden: number;
+  is_investment: number;
 }
 
 export interface OccurrenceViewRow extends OccurrenceRow {
@@ -70,6 +73,7 @@ export const toProfile = (row: ProfileRow): Profile => ({
   icon: row.icon,
   sortOrder: row.sort_order,
   createdAt: row.created_at,
+  investmentGoal: row.investment_goal ?? 0,
 });
 
 export const toCategory = (row: CategoryRow): Category => ({
@@ -95,6 +99,7 @@ export const toCommitment = (row: CommitmentRow): Commitment => ({
   endDate: row.end_date,
   dayOfMonth: row.day_of_month,
   notes: row.notes,
+  isInvestment: row.is_investment === 1,
   archived: row.archived === 1,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
@@ -112,6 +117,7 @@ export const toOccurrence = (row: OccurrenceRow): Occurrence => ({
   status: row.status,
   paidAt: row.paid_at,
   isOverridden: row.is_overridden === 1,
+  isInvestment: row.is_investment === 1,
 });
 
 export const toOccurrenceView = (row: OccurrenceViewRow): OccurrenceView => ({

@@ -98,6 +98,42 @@ a_receber = receitas_previstas − receitas_realizadas
 
 `skipped` sai de todas as contas — é o mês que não conta.
 
+## Investimento
+
+Ocorrências com `is_investment = 1` **saem do total de despesas** e formam um
+grupo próprio. A conta do mês passa a ser:
+
+```
+despesas_previstas = Σ expense onde is_investment = 0
+investido_previsto = Σ expense onde is_investment = 1
+investido_real     = Σ expense onde is_investment = 1 e status = 'paid'
+
+saldo_previsto     = receitas_previstas − despesas_previstas
+sobra_apos_investir = saldo_previsto − investido_real
+```
+
+O saldo do mês ignora o investimento de propósito: ele responde *"quanto sobrou
+para eu decidir o que fazer"*, e investir é uma das decisões possíveis. Somar o
+aporte como gasto faria o app reportar R$ 6.500 de despesa num mês em que você
+gastou R$ 5.000 e guardou R$ 1.500.
+
+### Meta
+
+Cada perfil tem `investment_goal`, um valor mensal em centavos. No escopo
+consolidado as metas dos perfis somam.
+
+```
+falta         = meta − investido_real
+progresso     = min(investido_real / meta, 1)      // null se meta = 0
+meta_cabe     = saldo_previsto >= meta
+```
+
+`meta_cabe` é o número que importa: separa a meta que dá para bater este mês da
+meta que é fantasia. O app diz "a sobra do mês cobre" ou "não cobre" em vez de
+só mostrar a barra.
+
+Meta zero desliga o acompanhamento — o card some da tela do mês.
+
 **Comprometido**: a fatia das despesas previstas que vem de compromissos
 `installment` ou `recurring`. É o número que responde "quanto do meu salário já
 está vendido antes do mês começar".
@@ -171,7 +207,21 @@ Não há recuperação — sem servidor, sem e-mail. A saída é reinstalar, o q
 apaga os dados. A tela de PIN diz isso, e o app insiste no backup JSON antes de
 ativar a trava.
 
-## Backup
+## Backup automático
+
+O usuário escolhe uma pasta **uma vez**, pelo seletor do sistema (SAF). O URI
+fica em `settings.backup_folder_uri`.
+
+- A cada abertura do app, se passaram mais de 12 horas desde o último, grava
+  `meu-caixa-YYYY-MM-DD.json` naquela pasta.
+- Mantém os 7 arquivos mais recentes; apaga os anteriores.
+- Falha em silêncio: backup que quebra o boot é pior que backup que não roda.
+
+A pasta ser escolhida pelo usuário é o ponto. Gravar em diretório do app faria
+a desinstalação levar os backups junto — exatamente quando você mais precisa
+deles. Pasta escolhida via SAF fica fora da sandbox e sobrevive.
+
+## Backup manual
 
 - **Exportar**: JSON com perfis, categorias, compromissos, ocorrências e
   `schema_version`. Vai para o share sheet do sistema.

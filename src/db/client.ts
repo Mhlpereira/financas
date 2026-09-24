@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 
-import { CREATE_SCHEMA, SCHEMA_VERSION } from './schema';
+import { CREATE_SCHEMA, MIGRATE_TO_V2, SCHEMA_VERSION } from './schema';
 import { seedDatabase } from './seed';
 
 const DB_NAME = 'meucaixa.db';
@@ -30,7 +30,20 @@ async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
     return;
   }
 
+  if (current < 2) await runMigration(db, MIGRATE_TO_V2);
+
   if (current < SCHEMA_VERSION) await writeVersion(db, SCHEMA_VERSION);
+}
+
+async function runMigration(db: SQLite.SQLiteDatabase, sql: string): Promise<void> {
+  for (const statement of sql.split(';').map((item) => item.trim()).filter(Boolean)) {
+    try {
+      await db.execAsync(statement);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('duplicate column name')) throw error;
+    }
+  }
 }
 
 async function readVersion(db: SQLite.SQLiteDatabase): Promise<number> {

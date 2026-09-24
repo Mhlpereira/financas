@@ -6,7 +6,9 @@ export type SettingKey =
   | 'lock_timeout_seconds'
   | 'horizon_months'
   | 'onboarding_done'
-  | 'schema_version';
+  | 'schema_version'
+  | 'backup_folder_uri'
+  | 'backup_last_at';
 
 export async function getSetting(key: SettingKey): Promise<string | null> {
   const db = await getDb();

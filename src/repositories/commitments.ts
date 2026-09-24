@@ -91,7 +91,7 @@ export async function updateCommitment(id: string, input: CommitmentInput): Prom
       `UPDATE commitments SET
          profile_id = ?, category_id = ?, kind = ?, type = ?, description = ?,
          amount = ?, installments = ?, start_date = ?, end_date = ?,
-         day_of_month = ?, notes = ?, updated_at = ?
+         day_of_month = ?, notes = ?, is_investment = ?, updated_at = ?
        WHERE id = ?`,
       [
         commitment.profileId,
@@ -105,6 +105,7 @@ export async function updateCommitment(id: string, input: CommitmentInput): Prom
         commitment.endDate,
         commitment.dayOfMonth,
         commitment.notes,
+        commitment.isInvestment ? 1 : 0,
         commitment.updatedAt,
         id,
       ],
@@ -116,8 +117,16 @@ export async function updateCommitment(id: string, input: CommitmentInput): Prom
 
     for (const change of plan.toUpdate) {
       await db.runAsync(
-        'UPDATE occurrences SET due_date = ?, amount = ?, profile_id = ?, kind = ? WHERE id = ?',
-        [change.dueDate, change.amount, commitment.profileId, commitment.kind, change.id],
+        `UPDATE occurrences SET due_date = ?, amount = ?, profile_id = ?, kind = ?,
+                is_investment = ? WHERE id = ?`,
+        [
+          change.dueDate,
+          change.amount,
+          commitment.profileId,
+          commitment.kind,
+          commitment.isInvestment ? 1 : 0,
+          change.id,
+        ],
       );
     }
 
@@ -276,8 +285,8 @@ async function insertCommitmentRow(
   await db.runAsync(
     `INSERT INTO commitments
        (id, profile_id, category_id, kind, type, description, amount, installments,
-        start_date, end_date, day_of_month, notes, archived, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        start_date, end_date, day_of_month, notes, is_investment, archived, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       commitment.id,
       commitment.profileId,
@@ -291,6 +300,7 @@ async function insertCommitmentRow(
       commitment.endDate,
       commitment.dayOfMonth,
       commitment.notes,
+      commitment.isInvestment ? 1 : 0,
       commitment.archived ? 1 : 0,
       commitment.createdAt,
       commitment.updatedAt,
@@ -305,8 +315,8 @@ async function insertOccurrenceRow(
   await db.runAsync(
     `INSERT OR IGNORE INTO occurrences
        (id, commitment_id, profile_id, kind, competence, due_date, amount,
-        installment_index, status, paid_at, is_overridden)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        installment_index, status, paid_at, is_overridden, is_investment)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       occurrence.id,
       occurrence.commitmentId,
@@ -319,6 +329,7 @@ async function insertOccurrenceRow(
       occurrence.status,
       occurrence.paidAt,
       occurrence.isOverridden ? 1 : 0,
+      occurrence.isInvestment ? 1 : 0,
     ],
   );
 }

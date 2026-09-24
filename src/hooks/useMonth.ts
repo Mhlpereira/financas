@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { groupByDueDate, summarizeMonth, totalsByCategory } from '@/domain/calc';
 import type { MonthSummary, OccurrenceView } from '@/domain/types';
+import { ALL_PROFILES } from '@/domain/types';
 import { listMonth } from '@/repositories/occurrences';
 import { useAppStore } from '@/stores/app';
 
@@ -11,6 +12,7 @@ export function useMonth(filter: MonthFilter = 'all') {
   const competence = useAppStore((state) => state.competence);
   const scope = useAppStore((state) => state.scope);
   const revision = useAppStore((state) => state.revision);
+  const profiles = useAppStore((state) => state.profiles);
 
   const [occurrences, setOccurrences] = useState<OccurrenceView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,9 +32,17 @@ export function useMonth(filter: MonthFilter = 'all') {
     };
   }, [competence, scope, revision]);
 
+  const investmentGoal = useMemo(
+    () =>
+      scope === ALL_PROFILES
+        ? profiles.reduce((total, profile) => total + profile.investmentGoal, 0)
+        : (profiles.find((profile) => profile.id === scope)?.investmentGoal ?? 0),
+    [profiles, scope],
+  );
+
   const summary: MonthSummary = useMemo(
-    () => summarizeMonth(competence, occurrences),
-    [competence, occurrences],
+    () => summarizeMonth(competence, occurrences, investmentGoal),
+    [competence, occurrences, investmentGoal],
   );
 
   const filtered = useMemo(() => {

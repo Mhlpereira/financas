@@ -50,6 +50,11 @@ npm run typecheck  tsc --noEmit
 
 ## Restrições
 
-- Tem que rodar no **Expo Go** (SDK 57), Android e iOS. Sem dependência que
-  exija build nativo.
+- O app tem que rodar no **Expo Go** (SDK 57), Android e iOS. A exceção é o
+  widget de tela inicial, que é nativo e só existe no APK compilado.
+- Tudo que toca `android/` vai em `plugins/` como config plugin. Arquivo solto
+  em `android/` é apagado pelo próximo `expo prebuild --clean`.
+- A keystore de release mora em `keystore/`, fora de `android/`, e as senhas em
+  `keystore/credentials.json` (ignorado pelo git). Nunca escreva senha em
+  arquivo versionado.
 - Texto de interface em pt-BR, nomes de domínio no código em inglês.

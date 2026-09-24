@@ -3,17 +3,30 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { resetDatabase } from '@/db/client';
 import { BackupFormatError, exportBackup, importBackup, parseBackup } from '@/repositories/backup';
+import {
+  chooseBackupFolder,
+  disableAutoBackup,
+  getBackupFolder,
+  getLastBackupAt,
+  writeBackupNow,
+  type BackupFolder,
+} from '@/services/autoBackup';
 import { useAppStore } from '@/stores/app';
 import { useLockStore } from '@/stores/lock';
 import { colors, radius, spacing } from '@/theme';
+import { formatDateBR, makeISODate } from '@/utils/date';
 import { Card } from '@/ui/Card';
 import { Screen, SectionHeader } from '@/ui/Screen';
 import { Text } from '@/ui/Text';
+
+function isoFrom(date: Date): string {
+  return makeISODate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+}
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -28,6 +41,60 @@ export default function SettingsScreen() {
   const biometricsLabel = useLockStore((state) => state.biometricsLabel);
 
   const [busy, setBusy] = useState(false);
+  const [folder, setFolder] = useState<BackupFolder | null>(null);
+  const [lastBackup, setLastBackup] = useState<Date | null>(null);
+
+  const refreshBackupState = useCallback(async () => {
+    const [current, last] = await Promise.all([getBackupFolder(), getLastBackupAt()]);
+    setFolder(current);
+    setLastBackup(last);
+  }, []);
+
+  useEffect(() => {
+    refreshBackupState();
+  }, [refreshBackupState]);
+
+  const handleChooseFolder = async () => {
+    try {
+      const picked = await chooseBackupFolder();
+      if (!picked) return;
+      await writeBackupNow();
+      await refreshBackupState();
+      Alert.alert(
+        'Backup automático ligado',
+        `A cada vez que você abrir o app, uma cópia dos seus dados é salva em "${picked.label}". Essa pasta fica fora do app, então desinstalar não apaga os backups.`,
+      );
+    } catch {
+      Alert.alert('Não deu', 'Não foi possível usar essa pasta. Tente escolher outra.');
+    }
+  };
+
+  const handleBackupNow = async () => {
+    setBusy(true);
+    try {
+      const name = await writeBackupNow();
+      await refreshBackupState();
+      Alert.alert('Backup salvo', name);
+    } catch {
+      Alert.alert('Não deu', 'Não foi possível gravar o backup nessa pasta.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDisableAuto = () => {
+    Alert.alert('Desligar backup automático', 'Os backups já salvos continuam onde estão.', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Desligar',
+        style: 'destructive',
+        onPress: async () => {
+          await disableAutoBackup();
+          await refreshBackupState();
+        },
+      },
+    ]);
+  };
 
   const handleExport = async () => {
     setBusy(true);
@@ -158,6 +225,51 @@ export default function SettingsScreen() {
           ) : null}
         </Card>
 
+        <SectionHeader title="Backup automático" />
+        <Card padded={false}>
+          {folder ? (
+            <>
+              <Row
+                icon="shield-checkmark"
+                label="Salvando em"
+                value={folder.label}
+                onPress={handleChooseFolder}
+              />
+              <Row
+                icon="save-outline"
+                label="Fazer backup agora"
+                value={
+                  lastBackup
+                    ? `último ${formatDateBR(isoFrom(lastBackup))}`
+                    : 'nenhum ainda'
+                }
+                onPress={handleBackupNow}
+                disabled={busy}
+                bordered
+              />
+              <Row
+                icon="close-circle-outline"
+                label="Desligar backup automático"
+                onPress={handleDisableAuto}
+                bordered
+              />
+            </>
+          ) : (
+            <Row
+              icon="shield-outline"
+              label="Escolher pasta de backup"
+              value="desligado"
+              onPress={handleChooseFolder}
+            />
+          )}
+        </Card>
+
+        <Text variant="caption" tone="faint" style={styles.note}>
+          {folder
+            ? 'Uma cópia é salva toda vez que você abre o app, no máximo uma a cada 12 horas. Os 7 backups mais recentes são mantidos.'
+            : 'Escolha uma pasta fora do app — Downloads ou uma sincronizada com o Drive. Assim os backups sobrevivem mesmo se o app for desinstalado.'}
+        </Text>
+
         <SectionHeader title="Dados" />
         <Card padded={false}>
           <Row
@@ -283,5 +395,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: spacing.xl,
+  },
+  note: {
+    paddingHorizontal: spacing.xs,
+    lineHeight: 17,
   },
 });

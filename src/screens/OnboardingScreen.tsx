@@ -89,6 +89,7 @@ export function OnboardingScreen() {
         endDate: null,
         dayOfMonth: day,
         notes: null,
+        isInvestment: false,
       });
     }
 

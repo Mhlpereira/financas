@@ -36,6 +36,13 @@
     },
     "plugins": [
       "expo-router",
+      "expo-system-ui",
+      [
+        "expo-navigation-bar",
+        {
+          "style": "light"
+        }
+      ],
       "expo-sqlite",
       "expo-secure-store",
       "expo-sharing",
@@ -45,7 +52,9 @@
           "faceIDPermission": "Usar Face ID para desbloquear o Meu Caixa."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "./plugins/withQuickEntryWidget",
+      "./plugins/withReleaseSigning"
     ],
     "experiments": {
       "typedRoutes": false

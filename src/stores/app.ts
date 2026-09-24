@@ -6,6 +6,7 @@ import { listCategories } from '@/repositories/categories';
 import { extendRecurringHorizon } from '@/repositories/commitments';
 import { listProfiles } from '@/repositories/profiles';
 import { getSetting, setSetting } from '@/repositories/settings';
+import { runAutoBackup } from '@/services/autoBackup';
 import { currentCompetence, type Competence } from '@/utils/date';
 
 interface AppState {
@@ -57,6 +58,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       onboardingDone: onboarding === '1',
       revision: get().revision + 1,
     });
+
+    runAutoBackup();
   },
 
   refreshProfiles: async () => {

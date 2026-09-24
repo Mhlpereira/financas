@@ -19,10 +19,13 @@ const isCommitted = (occurrence: OccurrenceView) =>
 export function summarizeMonth(
   competence: Competence,
   occurrences: OccurrenceView[],
+  investmentGoal: Cents = 0,
 ): MonthSummary {
   const counted = occurrences.filter(isCounted);
   const income = counted.filter((occurrence) => occurrence.kind === 'income');
-  const expense = counted.filter((occurrence) => occurrence.kind === 'expense');
+  const outflow = counted.filter((occurrence) => occurrence.kind === 'expense');
+  const expense = outflow.filter((occurrence) => !occurrence.isInvestment);
+  const investment = outflow.filter((occurrence) => occurrence.isInvestment);
   const paid = (list: OccurrenceView[]) => list.filter((item) => item.status === 'paid');
 
   const incomePlanned = sum(income.map((item) => item.amount));
@@ -31,11 +34,15 @@ export function summarizeMonth(
   const expenseActual = sum(paid(expense).map((item) => item.amount));
   const committed = sum(expense.filter(isCommitted).map((item) => item.amount));
 
+  const investmentPlanned = sum(investment.map((item) => item.amount));
+  const investmentActual = sum(paid(investment).map((item) => item.amount));
+  const balancePlanned = incomePlanned - expensePlanned;
+
   return {
     competence,
     incomePlanned,
     expensePlanned,
-    balancePlanned: incomePlanned - expensePlanned,
+    balancePlanned,
     incomeActual,
     expenseActual,
     balanceActual: incomeActual - expenseActual,
@@ -43,7 +50,21 @@ export function summarizeMonth(
     free: incomePlanned - committed,
     toPay: expensePlanned - expenseActual,
     toReceive: incomePlanned - incomeActual,
+    investmentPlanned,
+    investmentActual,
+    investmentGoal,
+    investmentGap: investmentGoal - investmentActual,
+    leftAfterInvesting: balancePlanned - investmentActual,
   };
+}
+
+export function investmentProgress(summary: MonthSummary): number | null {
+  if (summary.investmentGoal <= 0) return null;
+  return Math.min(summary.investmentActual / summary.investmentGoal, 1);
+}
+
+export function canAffordGoal(summary: MonthSummary): boolean {
+  return summary.balancePlanned >= summary.investmentGoal;
 }
 
 export function spentRatio(summary: MonthSummary): number {

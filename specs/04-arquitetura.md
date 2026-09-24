@@ -18,6 +18,11 @@
 | Gestos | `react-native-gesture-handler` + `reanimated` | Swipe na linha do lançamento |
 | Data picker | `@react-native-community/datetimepicker` | Picker nativo, roda no Expo Go |
 | Backup | `expo-file-system` + `expo-sharing` + `expo-document-picker` | Exportar e importar JSON |
+| Barras do sistema | `expo-system-ui` + `expo-navigation-bar` | Tema escuro nas barras do Android |
+
+**Atenção:** `androidNavigationBar` e `androidStatusBar` no `app.json` foram
+descontinuados no SDK 57 e **não fazem efeito**. O prebuild avisa, mas o build
+passa. A configuração real é pelo plugin `expo-navigation-bar`.
 
 **Por que datas próprias em vez de `date-fns`:** o app não opera sobre `Date`.
 Ele opera sobre duas strings — `Competence` (`'YYYY-MM'`) e `ISODate`
@@ -26,8 +31,30 @@ em fevereiro, comparar competências) são aritmética de inteiros sobre elas.
 Passar por `Date` só reintroduziria timezone e horário, que são exatamente as
 duas coisas que criam bug aqui. São ~40 linhas, cobertas por teste.
 
-Nenhuma dependência fora do que o Expo Go carrega. Um `npx expo start` e o QR
-code bastam.
+O app em si roda no **Expo Go** — `npx expo start` e o QR code bastam para
+desenvolver. O **widget de tela inicial é a exceção**: ele é código nativo
+(Kotlin + RemoteViews) e só existe num APK compilado. O Expo Go roda todo o
+resto normalmente, apenas sem o widget aparecer na lista do Android.
+
+## Config plugins
+
+Tudo que toca a pasta `android/` vive em `plugins/`, nunca como arquivo solto —
+porque `expo prebuild --clean` apaga a pasta inteira.
+
+| Plugin | O que faz |
+| --- | --- |
+| `withQuickEntryWidget` | Gera o `AppWidgetProvider` em Kotlin, o layout, os drawables e registra o receiver no manifest |
+| `withReleaseSigning` | Copia a keystore de `keystore/` para dentro de `android/`, injeta as credenciais no `gradle.properties` e troca `signingConfigs.debug` por `release` |
+
+O `withReleaseSigning` existe por causa de um erro real: a keystore estava
+dentro de `android/`, um `prebuild --clean` apagou ela, e o build seguiu
+**verde** assinando com a chave de debug — porque o template do Expo usa
+`signingConfigs.debug` como padrão do release. O APK gerado não instalava por
+cima do app existente, e a keystore original não era recuperável.
+
+Por isso o plugin **quebra o build com erro explícito** quando a keystore ou as
+credenciais faltam. Falhar alto é o objetivo: o modo de falha silencioso foi o
+que causou o estrago.
 
 ## Camadas
 

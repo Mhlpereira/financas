@@ -17,6 +17,7 @@ export interface Profile {
   icon: string;
   sortOrder: number;
   createdAt: string;
+  investmentGoal: Cents;
 }
 
 export interface Category {
@@ -42,6 +43,7 @@ export interface Commitment {
   endDate: ISODate | null;
   dayOfMonth: number | null;
   notes: string | null;
+  isInvestment: boolean;
   archived: boolean;
   createdAt: string;
   updatedAt: string;
@@ -59,6 +61,7 @@ export interface Occurrence {
   status: OccurrenceStatus;
   paidAt: string | null;
   isOverridden: boolean;
+  isInvestment: boolean;
 }
 
 export interface OccurrenceView extends Occurrence {
@@ -85,6 +88,11 @@ export interface MonthSummary {
   free: Cents;
   toPay: Cents;
   toReceive: Cents;
+  investmentPlanned: Cents;
+  investmentActual: Cents;
+  investmentGoal: Cents;
+  investmentGap: Cents;
+  leftAfterInvesting: Cents;
 }
 
 export interface ProjectionMonth {
@@ -128,4 +136,5 @@ export interface CommitmentInput {
   endDate: ISODate | null;
   dayOfMonth: number | null;
   notes: string | null;
+  isInvestment: boolean;
 }

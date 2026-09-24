@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
-import { spentRatio } from '@/domain/calc';
+import { canAffordGoal, investmentProgress, spentRatio } from '@/domain/calc';
 import type { OccurrenceView } from '@/domain/types';
 import { ALL_PROFILES } from '@/domain/types';
 import { useMonth, type MonthFilter } from '@/hooks/useMonth';
@@ -13,6 +13,7 @@ import { deleteOccurrence, togglePaid } from '@/repositories/occurrences';
 import { useAppStore } from '@/stores/app';
 import { balanceColor, colors, radius, spacing } from '@/theme';
 import { currentCompetence, formatDayHeader, formatMonthLong } from '@/utils/date';
+import { formatMoney } from '@/utils/money';
 import { Card } from '@/ui/Card';
 import { EmptyState } from '@/ui/EmptyState';
 import { Fab } from '@/ui/Fab';
@@ -204,6 +205,83 @@ export default function MonthScreen() {
           </Card>
         </View>
 
+        {summary.investmentGoal > 0 || summary.investmentActual > 0 ? (
+          <Card style={styles.investCard}>
+            <View style={styles.investHeader}>
+              <View style={styles.investTitle}>
+                <Ionicons name="trending-up" size={16} color={colors.brandText} />
+                <Text variant="label" tone="muted">
+                  Investimento
+                </Text>
+              </View>
+              {summary.investmentGoal > 0 ? (
+                <Text variant="micro" tone="faint">
+                  meta {formatMoney(summary.investmentGoal)}
+                </Text>
+              ) : null}
+            </View>
+
+            <View style={styles.investAmounts}>
+              <Money value={summary.investmentActual} variant="title" color={colors.brandText} />
+              {summary.investmentGoal > 0 ? (
+                <Text variant="caption" tone="faint">
+                  {Math.round((investmentProgress(summary) ?? 0) * 100)}% da meta
+                </Text>
+              ) : null}
+            </View>
+
+            {summary.investmentGoal > 0 ? (
+              <>
+                <ProgressBar
+                  ratio={investmentProgress(summary) ?? 0}
+                  color={colors.brand}
+                />
+
+                <View style={styles.investFooter}>
+                  {summary.investmentGap > 0 ? (
+                    <>
+                      <Text variant="caption" tone="muted">
+                        Faltam{' '}
+                      </Text>
+                      <Money
+                        value={summary.investmentGap}
+                        variant="caption"
+                        color={canAffordGoal(summary) ? colors.warning : colors.negative}
+                      />
+                      <Text variant="caption" tone="muted">
+                        {canAffordGoal(summary)
+                          ? ' — a sobra do mês cobre'
+                          : ' — a sobra do mês não cobre'}
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Ionicons name="checkmark-circle" size={13} color={colors.positive} />
+                      <Text variant="caption" tone="positive">
+                        {' '}
+                        Meta batida este mês
+                      </Text>
+                    </>
+                  )}
+                </View>
+              </>
+            ) : null}
+
+            {summary.investmentPlanned > summary.investmentActual ? (
+              <View style={styles.investFooter}>
+                <Text variant="caption" tone="faint">
+                  Previsto no mês{' '}
+                </Text>
+                <Money
+                  value={summary.investmentPlanned}
+                  variant="caption"
+                  color={colors.textFaint}
+                />
+              </View>
+            ) : null}
+          </Card>
+        ) : null}
+
         <SectionHeader
           title="Lançamentos"
           trailing={
@@ -325,5 +403,28 @@ const styles = StyleSheet.create({
   },
   groupHeader: {
     paddingLeft: spacing.xs,
+  },
+  investCard: {
+    gap: spacing.md,
+  },
+  investHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  investTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  investAmounts: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  investFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
 });

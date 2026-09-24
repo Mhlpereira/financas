@@ -30,6 +30,19 @@ export interface ProfileInput {
   icon: string;
 }
 
+export async function setInvestmentGoal(id: string, goal: number): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('UPDATE profiles SET investment_goal = ? WHERE id = ?', [goal, id]);
+}
+
+export async function totalInvestmentGoal(): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ total: number }>(
+    'SELECT COALESCE(SUM(investment_goal), 0) AS total FROM profiles',
+  );
+  return row?.total ?? 0;
+}
+
 export async function createProfile(input: ProfileInput): Promise<Profile> {
   const db = await getDb();
   const id = createId();
@@ -46,7 +59,15 @@ export async function createProfile(input: ProfileInput): Promise<Profile> {
     [id, input.name.trim(), input.color, input.icon, sortOrder, createdAt],
   );
 
-  return { id, name: input.name.trim(), color: input.color, icon: input.icon, sortOrder, createdAt };
+  return {
+    id,
+    name: input.name.trim(),
+    color: input.color,
+    icon: input.icon,
+    sortOrder,
+    createdAt,
+    investmentGoal: 0,
+  };
 }
 
 export async function updateProfile(id: string, input: ProfileInput): Promise<void> {

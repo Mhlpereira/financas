@@ -29,6 +29,7 @@ O custo é manter a materialização em dia. Isso é resolvido em [02](02-regras
 | `icon` | TEXT NOT NULL | nome do ícone Ionicons |
 | `sort_order` | INTEGER NOT NULL | ordem no seletor |
 | `created_at` | TEXT NOT NULL | ISO 8601 |
+| `investment_goal` | INTEGER NOT NULL DEFAULT 0 | centavos/mês. 0 = não acompanha |
 
 Sempre existe pelo menos um perfil. O último perfil não pode ser excluído.
 
@@ -63,6 +64,7 @@ física ambas têm "Transporte"; duplicar por perfil só geraria manutenção do
 | `end_date` | TEXT NULL | só em `recurring`; NULL = sem fim |
 | `day_of_month` | INTEGER NULL | 1–31, só em `recurring` |
 | `notes` | TEXT NULL | |
+| `is_investment` | INTEGER NOT NULL DEFAULT 0 | 1 = dinheiro guardado, não gasto |
 | `archived` | INTEGER NOT NULL DEFAULT 0 | encerra sem apagar histórico |
 | `created_at` | TEXT NOT NULL | |
 | `updated_at` | TEXT NOT NULL | |
@@ -94,6 +96,7 @@ Parcelado guarda o valor da parcela, não o total. É o que a loja informa
 | `status` | TEXT NOT NULL | `pending` \| `paid` \| `skipped` |
 | `paid_at` | TEXT NULL | |
 | `is_overridden` | INTEGER NOT NULL DEFAULT 0 | 1 = valor editado à mão |
+| `is_investment` | INTEGER NOT NULL DEFAULT 0 | desnormalizado, evita JOIN na soma do mês |
 
 `UNIQUE (commitment_id, competence)` — um compromisso cai no máximo uma vez por mês.
 
@@ -129,6 +132,28 @@ CREATE INDEX idx_com_profile      ON commitments (profile_id, archived);
 
 A tela do mês faz `WHERE profile_id = ? AND competence = ?` — o índice composto
 cobre. A visão consolidada usa só `competence`.
+
+## Investimento não é gasto
+
+`is_investment` existe porque tratar aporte como despesa faz o app mentir.
+Você tira R$ 1.500 da conta para investir: o dinheiro sai do banco, mas não
+saiu do seu bolso — mudou de lugar. Somado como gasto, o app diria que você
+gastou R$ 6.500 num mês em que gastou R$ 5.000 e guardou R$ 1.500.
+
+O flag mora no compromisso (é uma propriedade da decisão) e é copiado para a
+ocorrência (para a soma do mês não precisar de JOIN). Um aporte mensal
+automático é um `recurring` com `is_investment = 1`.
+
+## Versões do schema
+
+| Versão | O que mudou |
+| --- | --- |
+| 1 | Schema inicial |
+| 2 | `profiles.investment_goal`, `commitments.is_investment`, `occurrences.is_investment` |
+
+A v2 entra por `ALTER TABLE ... ADD COLUMN` com `DEFAULT 0`, então bancos v1
+migram sem perder nada e sem precisar de conversão. A migração é idempotente:
+`duplicate column name` é engolido, o resto propaga.
 
 ## Dinheiro
 

@@ -66,6 +66,44 @@ Cada item é verificável no app rodando. A v1 está pronta quando todos passam.
 - [ ] **C4** Lista as rendas recorrentes com o total mensal.
 - [ ] **C5** Parcelamento quitado sai da lista.
 
+## Investimento
+
+- [ ] **I1** Meta zero não mostra o card de investimento na tela do mês.
+- [ ] **I2** Definir meta de R$ 2.000 no perfil faz o card aparecer.
+- [ ] **I3** Despesa marcada como investimento **não** entra em "Saídas".
+- [ ] **I4** Investimento pago soma em "investido"; pendente conta só no previsto.
+- [ ] **I5** O card mostra o quanto falta para a meta e a porcentagem.
+- [ ] **I6** Com a sobra do mês maior que a meta, o app diz que a sobra cobre.
+- [ ] **I7** Com a sobra menor, diz que não cobre, em vermelho.
+- [ ] **I8** Meta batida troca o texto por "Meta batida este mês".
+- [ ] **I9** No escopo "Todos", as metas dos perfis somam.
+- [ ] **I10** O modo "Investir" da tela rápida grava com o flag certo.
+- [ ] **I11** Trocar o lançamento para Receita desliga o toggle de investimento.
+
+## Lançamento rápido e widget
+
+- [ ] **W1** O widget aparece na lista de widgets do Android.
+- [ ] **W2** Os três botões abrem a tela rápida com o tipo já escolhido.
+- [ ] **W3** A tela rápida salva com dois toques depois de digitar o valor.
+- [ ] **W4** A observação vira a descrição; vazia, usa um rótulo padrão.
+- [ ] **W5** O atalho leva ao formulário completo mantendo nada digitado.
+
+## Backup automático
+
+- [ ] **B1** Escolher a pasta grava um backup na hora.
+- [ ] **B2** Reabrir o app depois de 12h grava um novo.
+- [ ] **B3** Reabrir antes de 12h não grava.
+- [ ] **B4** Só os 7 backups mais recentes ficam na pasta.
+- [ ] **B5** Desinstalar o app **não** apaga os backups da pasta escolhida.
+- [ ] **B6** Pasta inacessível não quebra a abertura do app.
+
+## Migração
+
+- [ ] **G1** Banco v1 com dados migra para v2 sem perder linha.
+- [ ] **G2** Colunas novas entram com zero nos registros antigos.
+- [ ] **G3** Rodar a migração duas vezes não quebra.
+- [ ] **G4** Backup exportado na v2 importa de volta com os campos novos.
+
 ## Trava
 
 - [ ] **T1** Definir PIN pede confirmação e rejeita se as duas digitações diferirem.
@@ -90,6 +128,8 @@ Cada item é verificável no app rodando. A v1 está pronta quando todos passam.
 
 - [ ] **Q1** `npx tsc --noEmit` passa sem erro.
 - [ ] **Q2** `npm test` passa, cobrindo materialização, `clampDay` e saldos.
-- [ ] **Q3** Roda no Expo Go, Android e iOS, sem build nativo.
+- [ ] **Q3** O app roda no Expo Go (o widget, sendo nativo, só no APK compilado).
+- [ ] **Q6** `expo prebuild --clean` seguido de build gera APK assinado com a
+      keystore de release, não com a de debug.
 - [ ] **Q4** A aba Mês responde em menos de 100ms com 500 ocorrências no mês.
 - [ ] **Q5** Nenhum aviso de chave duplicada ou update fora de ciclo no console.
